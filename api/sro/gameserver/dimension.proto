@@ -4,9 +4,10 @@ option go_package = "pkg/pb";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "sro/globals.proto";
 
 service DimensionService {
-  rpc GetDimension(DimensionTarget) returns (Dimension) {
+  rpc GetDimension(sro.DimensionTarget) returns (Dimension) {
     option (google.api.http) = {
       get : "/v1/dimensions/name/{name}"
       additional_bindings : {get : "/v1/dimensions/id/{id}"}
@@ -42,7 +43,7 @@ service DimensionService {
     };
   }
 
-  rpc DeleteDimension(DimensionTarget) returns (google.protobuf.Empty) {
+  rpc DeleteDimension(sro.DimensionTarget) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete : "/v1/dimensions/name/{name}"
       additional_bindings : {delete : "/v1/dimensions/id/{id}"}
@@ -58,12 +59,12 @@ message CreateDimensionRequest {
 }
 
 message DuplicateDimensionRequest {
-  DimensionTarget target = 1;
+  sro.DimensionTarget target = 1;
   string name = 2;
 }
 
 message EditDimensionRequest {
-  DimensionTarget target = 1;
+  sro.DimensionTarget target = 1;
   oneof optional_name { string name = 2; }
   oneof optional_version { string version = 3; }
 
@@ -84,7 +85,7 @@ message Dimension {
   string version = 3;
 
   // All maps the realm should have available
-  repeated Map maps = 4;
+  repeated sro.MapTarget maps = 4;
 
   // Physical server location
   string location = 6;
