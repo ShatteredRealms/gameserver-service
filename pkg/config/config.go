@@ -1,27 +1,31 @@
 package config
 
-import "github.com/ShatteredRealms/go-common-service/pkg/config"
+import (
+	"context"
+
+	cconfig "github.com/ShatteredRealms/go-common-service/pkg/config"
+)
 
 var (
 	Version = "v1.0.0"
 )
 
 type DimensionConfig struct {
-	config.BaseConfig `yaml:",inline" mapstructure:",squash"`
-	Postgres          config.DBPoolConfig `yaml:"postgres"`
+	cconfig.BaseConfig `yaml:",inline" dimensionstructure:",squash"`
+	Postgres           cconfig.DBPoolConfig `yaml:"postgres"`
 }
 
-func NewDimensionConfig() *DimensionConfig {
-	return &DimensionConfig{
-		BaseConfig: config.BaseConfig{
-			Server: config.ServerAddress{
+func NewDimensionConfig(ctx context.Context) (*DimensionConfig, error) {
+	config := &DimensionConfig{
+		BaseConfig: cconfig.BaseConfig{
+			Server: cconfig.ServerAddress{
 				Host: "localhost",
-				Port: "8083",
+				Port: "8085",
 			},
-			Keycloak: config.KeycloakConfig{
+			Keycloak: cconfig.KeycloakConfig{
 				BaseURL:      "localhost:8080",
 				Realm:        "default",
-				Id:           "ae593ef2-49d7-4ca1-8b8b-226f4e95b509",
+				Id:           "7b575e9b-c687-4cdc-b210-67c59b5f380f",
 				ClientId:     "sro-dimension-service",
 				ClientSecret: "**********",
 			},
@@ -29,13 +33,16 @@ func NewDimensionConfig() *DimensionConfig {
 			LogLevel:            0,
 			OpenTelemtryAddress: "localhost:4317",
 		},
-		Postgres: config.DBPoolConfig{
-			Master: config.DBConfig{
-				ServerAddress: config.ServerAddress{},
+		Postgres: cconfig.DBPoolConfig{
+			Master: cconfig.DBConfig{
+				ServerAddress: cconfig.ServerAddress{},
 				Name:          "dimension-service",
 				Username:      "postgres",
 				Password:      "password",
 			},
 		},
 	}
+
+	err := cconfig.BindConfigEnvs(ctx, "sro-dimension", config)
+	return config, err
 }
