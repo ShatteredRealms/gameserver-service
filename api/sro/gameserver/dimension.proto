@@ -1,0 +1,93 @@
+syntax = "proto3";
+package sro.gameserver;
+option go_package = "pkg/pb";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service DimensionService {
+  rpc GetDimension(DimensionTarget) returns (Dimension) {
+    option (google.api.http) = {
+      get : "/v1/dimensions/name/{name}"
+      additional_bindings : {get : "/v1/dimensions/id/{id}"}
+    };
+  }
+
+  rpc GetDimensions(google.protobuf.Empty) returns (Dimensions) {
+    option (google.api.http) = {
+      get : "/v1/dimensions"
+    };
+  }
+
+  rpc CreateDimension(CreateDimensionRequest) returns (Dimension) {
+    option (google.api.http) = {
+      post : "/v1/dimensions"
+      body : "*"
+    };
+  }
+
+  rpc DuplicateDimension(DuplicateDimensionRequest) returns (Dimension) {
+    option (google.api.http) = {
+      post : "/v1/dimensions/duplicate/name/{target.name}"
+      additional_bindings : {post : "/v1/dimensions/duplicate/id/{target.id}"}
+      body : "*"
+    };
+  }
+
+  rpc EditDimension(EditDimensionRequest) returns (Dimension) {
+    option (google.api.http) = {
+      put : "/v1/dimensions/name/{target.name}"
+      additional_bindings : {put : "/v1/dimensions/id/{target.id}"}
+      body : "*"
+    };
+  }
+
+  rpc DeleteDimension(DimensionTarget) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete : "/v1/dimensions/name/{name}"
+      additional_bindings : {delete : "/v1/dimensions/id/{id}"}
+    };
+  }
+}
+
+message CreateDimensionRequest {
+  string name = 1;
+  string version = 2;
+  repeated string map_ids = 3;
+  string location = 4;
+}
+
+message DuplicateDimensionRequest {
+  DimensionTarget target = 1;
+  string name = 2;
+}
+
+message EditDimensionRequest {
+  DimensionTarget target = 1;
+  oneof optional_name { string name = 2; }
+  oneof optional_version { string version = 3; }
+
+  bool edit_maps = 4;
+  repeated string map_ids = 5;
+
+  oneof optional_location { string location = 8; }
+}
+
+message Dimension {
+  // Unique id for the dimension
+  string id = 1;
+
+  // Unique name of the dimension
+  string name = 2;
+
+  // Server version used for each server instance
+  string version = 3;
+
+  // All maps the realm should have available
+  repeated Map maps = 4;
+
+  // Physical server location
+  string location = 6;
+}
+
+message Dimensions { repeated Dimension dimensions = 1; }
