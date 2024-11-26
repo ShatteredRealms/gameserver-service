@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	pb "github.com/ShatteredRealms/dimension-service/pkg/pb"
+	pb0 "github.com/ShatteredRealms/go-common-service/pkg/pb"
 	gomock "go.uber.org/mock/gomock"
 	grpc "google.golang.org/grpc"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -64,7 +65,7 @@ func (mr *MockDimensionServiceClientMockRecorder) CreateDimension(ctx, in any, o
 }
 
 // DeleteDimension mocks base method.
-func (m *MockDimensionServiceClient) DeleteDimension(ctx context.Context, in *pb.DimensionTarget, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (m *MockDimensionServiceClient) DeleteDimension(ctx context.Context, in *pb0.TargetId, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, in}
 	for _, a := range opts {
@@ -124,7 +125,7 @@ func (mr *MockDimensionServiceClientMockRecorder) EditDimension(ctx, in any, opt
 }
 
 // GetDimension mocks base method.
-func (m *MockDimensionServiceClient) GetDimension(ctx context.Context, in *pb.DimensionTarget, opts ...grpc.CallOption) (*pb.Dimension, error) {
+func (m *MockDimensionServiceClient) GetDimension(ctx context.Context, in *pb0.TargetId, opts ...grpc.CallOption) (*pb.Dimension, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, in}
 	for _, a := range opts {
@@ -203,7 +204,7 @@ func (mr *MockDimensionServiceServerMockRecorder) CreateDimension(arg0, arg1 any
 }
 
 // DeleteDimension mocks base method.
-func (m *MockDimensionServiceServer) DeleteDimension(arg0 context.Context, arg1 *pb.DimensionTarget) (*emptypb.Empty, error) {
+func (m *MockDimensionServiceServer) DeleteDimension(arg0 context.Context, arg1 *pb0.TargetId) (*emptypb.Empty, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteDimension", arg0, arg1)
 	ret0, _ := ret[0].(*emptypb.Empty)
@@ -248,7 +249,7 @@ func (mr *MockDimensionServiceServerMockRecorder) EditDimension(arg0, arg1 any) 
 }
 
 // GetDimension mocks base method.
-func (m *MockDimensionServiceServer) GetDimension(arg0 context.Context, arg1 *pb.DimensionTarget) (*pb.Dimension, error) {
+func (m *MockDimensionServiceServer) GetDimension(arg0 context.Context, arg1 *pb0.TargetId) (*pb.Dimension, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDimension", arg0, arg1)
 	ret0, _ := ret[0].(*pb.Dimension)

@@ -8,6 +8,7 @@ package pb
 
 import (
 	context "context"
+	pb "github.com/ShatteredRealms/go-common-service/pkg/pb"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -32,12 +33,12 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DimensionServiceClient interface {
-	GetDimension(ctx context.Context, in *DimensionTarget, opts ...grpc.CallOption) (*Dimension, error)
+	GetDimension(ctx context.Context, in *pb.TargetId, opts ...grpc.CallOption) (*Dimension, error)
 	GetDimensions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Dimensions, error)
 	CreateDimension(ctx context.Context, in *CreateDimensionRequest, opts ...grpc.CallOption) (*Dimension, error)
 	DuplicateDimension(ctx context.Context, in *DuplicateDimensionRequest, opts ...grpc.CallOption) (*Dimension, error)
 	EditDimension(ctx context.Context, in *EditDimensionRequest, opts ...grpc.CallOption) (*Dimension, error)
-	DeleteDimension(ctx context.Context, in *DimensionTarget, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteDimension(ctx context.Context, in *pb.TargetId, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type dimensionServiceClient struct {
@@ -48,7 +49,7 @@ func NewDimensionServiceClient(cc grpc.ClientConnInterface) DimensionServiceClie
 	return &dimensionServiceClient{cc}
 }
 
-func (c *dimensionServiceClient) GetDimension(ctx context.Context, in *DimensionTarget, opts ...grpc.CallOption) (*Dimension, error) {
+func (c *dimensionServiceClient) GetDimension(ctx context.Context, in *pb.TargetId, opts ...grpc.CallOption) (*Dimension, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Dimension)
 	err := c.cc.Invoke(ctx, DimensionService_GetDimension_FullMethodName, in, out, cOpts...)
@@ -98,7 +99,7 @@ func (c *dimensionServiceClient) EditDimension(ctx context.Context, in *EditDime
 	return out, nil
 }
 
-func (c *dimensionServiceClient) DeleteDimension(ctx context.Context, in *DimensionTarget, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *dimensionServiceClient) DeleteDimension(ctx context.Context, in *pb.TargetId, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, DimensionService_DeleteDimension_FullMethodName, in, out, cOpts...)
@@ -112,12 +113,12 @@ func (c *dimensionServiceClient) DeleteDimension(ctx context.Context, in *Dimens
 // All implementations must embed UnimplementedDimensionServiceServer
 // for forward compatibility.
 type DimensionServiceServer interface {
-	GetDimension(context.Context, *DimensionTarget) (*Dimension, error)
+	GetDimension(context.Context, *pb.TargetId) (*Dimension, error)
 	GetDimensions(context.Context, *emptypb.Empty) (*Dimensions, error)
 	CreateDimension(context.Context, *CreateDimensionRequest) (*Dimension, error)
 	DuplicateDimension(context.Context, *DuplicateDimensionRequest) (*Dimension, error)
 	EditDimension(context.Context, *EditDimensionRequest) (*Dimension, error)
-	DeleteDimension(context.Context, *DimensionTarget) (*emptypb.Empty, error)
+	DeleteDimension(context.Context, *pb.TargetId) (*emptypb.Empty, error)
 	mustEmbedUnimplementedDimensionServiceServer()
 }
 
@@ -128,7 +129,7 @@ type DimensionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedDimensionServiceServer struct{}
 
-func (UnimplementedDimensionServiceServer) GetDimension(context.Context, *DimensionTarget) (*Dimension, error) {
+func (UnimplementedDimensionServiceServer) GetDimension(context.Context, *pb.TargetId) (*Dimension, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDimension not implemented")
 }
 func (UnimplementedDimensionServiceServer) GetDimensions(context.Context, *emptypb.Empty) (*Dimensions, error) {
@@ -143,7 +144,7 @@ func (UnimplementedDimensionServiceServer) DuplicateDimension(context.Context, *
 func (UnimplementedDimensionServiceServer) EditDimension(context.Context, *EditDimensionRequest) (*Dimension, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EditDimension not implemented")
 }
-func (UnimplementedDimensionServiceServer) DeleteDimension(context.Context, *DimensionTarget) (*emptypb.Empty, error) {
+func (UnimplementedDimensionServiceServer) DeleteDimension(context.Context, *pb.TargetId) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDimension not implemented")
 }
 func (UnimplementedDimensionServiceServer) mustEmbedUnimplementedDimensionServiceServer() {}
@@ -168,7 +169,7 @@ func RegisterDimensionServiceServer(s grpc.ServiceRegistrar, srv DimensionServic
 }
 
 func _DimensionService_GetDimension_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DimensionTarget)
+	in := new(pb.TargetId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -180,7 +181,7 @@ func _DimensionService_GetDimension_Handler(srv interface{}, ctx context.Context
 		FullMethod: DimensionService_GetDimension_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DimensionServiceServer).GetDimension(ctx, req.(*DimensionTarget))
+		return srv.(DimensionServiceServer).GetDimension(ctx, req.(*pb.TargetId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -258,7 +259,7 @@ func _DimensionService_EditDimension_Handler(srv interface{}, ctx context.Contex
 }
 
 func _DimensionService_DeleteDimension_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DimensionTarget)
+	in := new(pb.TargetId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -270,7 +271,7 @@ func _DimensionService_DeleteDimension_Handler(srv interface{}, ctx context.Cont
 		FullMethod: DimensionService_DeleteDimension_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DimensionServiceServer).DeleteDimension(ctx, req.(*DimensionTarget))
+		return srv.(DimensionServiceServer).DeleteDimension(ctx, req.(*pb.TargetId))
 	}
 	return interceptor(ctx, in, info, handler)
 }

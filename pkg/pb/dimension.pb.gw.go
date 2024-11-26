@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 
+	pb_0 "github.com/ShatteredRealms/go-common-service/pkg/pb"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
@@ -36,32 +37,19 @@ var (
 	_ = metadata.Join
 )
 
-var filter_DimensionService_GetDimension_0 = &utilities.DoubleArray{Encoding: map[string]int{"name": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-
 func request_DimensionService_GetDimension_0(ctx context.Context, marshaler runtime.Marshaler, client DimensionServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq DimensionTarget
+		protoReq pb_0.TargetId
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["name"]
+	val, ok := pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Name{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Name); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Name, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Name).Name, err = runtime.String(val)
+	protoReq.Id, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_GetDimension_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 	msg, err := client.GetDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -69,38 +57,7 @@ func request_DimensionService_GetDimension_0(ctx context.Context, marshaler runt
 
 func local_request_DimensionService_GetDimension_0(ctx context.Context, marshaler runtime.Marshaler, server DimensionServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq DimensionTarget
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["name"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
-	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Name{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Name); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Name, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Name).Name, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_GetDimension_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.GetDimension(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_DimensionService_GetDimension_1 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-
-func request_DimensionService_GetDimension_1(ctx context.Context, marshaler runtime.Marshaler, client DimensionServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DimensionTarget
+		protoReq pb_0.TargetId
 		metadata runtime.ServerMetadata
 		err      error
 	)
@@ -108,49 +65,9 @@ func request_DimensionService_GetDimension_1(ctx context.Context, marshaler runt
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Id{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Id).Id, err = runtime.String(val)
+	protoReq.Id, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_GetDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.GetDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_DimensionService_GetDimension_1(ctx context.Context, marshaler runtime.Marshaler, server DimensionServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DimensionTarget
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
-	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Id{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Id).Id, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_GetDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := server.GetDimension(ctx, &protoReq)
 	return msg, metadata, err
@@ -207,13 +124,13 @@ func request_DimensionService_DuplicateDimension_0(ctx context.Context, marshale
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["target.name"]
+	val, ok := pathParams["target_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target_id")
 	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.name", val)
+	protoReq.TargetId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.name", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target_id", err)
 	}
 	msg, err := client.DuplicateDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -228,63 +145,13 @@ func local_request_DimensionService_DuplicateDimension_0(ctx context.Context, ma
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["target.name"]
+	val, ok := pathParams["target_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target_id")
 	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.name", val)
+	protoReq.TargetId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.name", err)
-	}
-	msg, err := server.DuplicateDimension(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_DimensionService_DuplicateDimension_1 = &utilities.DoubleArray{Encoding: map[string]int{"target": 0, "id": 1}, Base: []int{1, 1, 1, 0}, Check: []int{0, 1, 2, 3}}
-
-func request_DimensionService_DuplicateDimension_1(ctx context.Context, marshaler runtime.Marshaler, client DimensionServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DuplicateDimensionRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["target.id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.id")
-	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.id", val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_DuplicateDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.DuplicateDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_DimensionService_DuplicateDimension_1(ctx context.Context, marshaler runtime.Marshaler, server DimensionServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DuplicateDimensionRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["target.id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.id")
-	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.id", val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_DuplicateDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target_id", err)
 	}
 	msg, err := server.DuplicateDimension(ctx, &protoReq)
 	return msg, metadata, err
@@ -299,13 +166,13 @@ func request_DimensionService_EditDimension_0(ctx context.Context, marshaler run
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["target.name"]
+	val, ok := pathParams["target_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target_id")
 	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.name", val)
+	protoReq.TargetId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.name", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target_id", err)
 	}
 	msg, err := client.EditDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -320,94 +187,31 @@ func local_request_DimensionService_EditDimension_0(ctx context.Context, marshal
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["target.name"]
+	val, ok := pathParams["target_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target_id")
 	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.name", val)
+	protoReq.TargetId, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.name", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target_id", err)
 	}
 	msg, err := server.EditDimension(ctx, &protoReq)
 	return msg, metadata, err
 }
-
-var filter_DimensionService_EditDimension_1 = &utilities.DoubleArray{Encoding: map[string]int{"target": 0, "id": 1}, Base: []int{1, 1, 1, 0}, Check: []int{0, 1, 2, 3}}
-
-func request_DimensionService_EditDimension_1(ctx context.Context, marshaler runtime.Marshaler, client DimensionServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq EditDimensionRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["target.id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.id")
-	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.id", val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_EditDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.EditDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_DimensionService_EditDimension_1(ctx context.Context, marshaler runtime.Marshaler, server DimensionServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq EditDimensionRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["target.id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "target.id")
-	}
-	err = runtime.PopulateFieldFromPath(&protoReq, "target.id", val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "target.id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_EditDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.EditDimension(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_DimensionService_DeleteDimension_0 = &utilities.DoubleArray{Encoding: map[string]int{"name": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
 func request_DimensionService_DeleteDimension_0(ctx context.Context, marshaler runtime.Marshaler, client DimensionServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq DimensionTarget
+		protoReq pb_0.TargetId
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["name"]
+	val, ok := pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Name{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Name); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Name, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Name).Name, err = runtime.String(val)
+	protoReq.Id, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_DeleteDimension_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 	msg, err := client.DeleteDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -415,38 +219,7 @@ func request_DimensionService_DeleteDimension_0(ctx context.Context, marshaler r
 
 func local_request_DimensionService_DeleteDimension_0(ctx context.Context, marshaler runtime.Marshaler, server DimensionServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq DimensionTarget
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["name"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
-	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Name{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Name); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Name, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Name).Name, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_DeleteDimension_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.DeleteDimension(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_DimensionService_DeleteDimension_1 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-
-func request_DimensionService_DeleteDimension_1(ctx context.Context, marshaler runtime.Marshaler, client DimensionServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DimensionTarget
+		protoReq pb_0.TargetId
 		metadata runtime.ServerMetadata
 		err      error
 	)
@@ -454,49 +227,9 @@ func request_DimensionService_DeleteDimension_1(ctx context.Context, marshaler r
 	if !ok {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Id{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Id).Id, err = runtime.String(val)
+	protoReq.Id, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_DeleteDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.DeleteDimension(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_DimensionService_DeleteDimension_1(ctx context.Context, marshaler runtime.Marshaler, server DimensionServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DimensionTarget
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	val, ok := pathParams["id"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
-	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DimensionTarget_Id{}
-	} else if _, ok := protoReq.Target.(*DimensionTarget_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DimensionTarget_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DimensionTarget_Id).Id, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
-	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DimensionService_DeleteDimension_1); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := server.DeleteDimension(ctx, &protoReq)
 	return msg, metadata, err
@@ -514,7 +247,7 @@ func RegisterDimensionServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/GetDimension", runtime.WithHTTPPathPattern("/v1/dimensions/name/{name}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/GetDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -527,26 +260,6 @@ func RegisterDimensionServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		forward_DimensionService_GetDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodGet, pattern_DimensionService_GetDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/GetDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_DimensionService_GetDimension_1(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_GetDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodGet, pattern_DimensionService_GetDimensions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -594,7 +307,7 @@ func RegisterDimensionServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/DuplicateDimension", runtime.WithHTTPPathPattern("/v1/dimensions/duplicate/name/{target.name}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/DuplicateDimension", runtime.WithHTTPPathPattern("/v1/dimensions/duplicate/id/{target_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -608,33 +321,13 @@ func RegisterDimensionServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		}
 		forward_DimensionService_DuplicateDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_DimensionService_DuplicateDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/DuplicateDimension", runtime.WithHTTPPathPattern("/v1/dimensions/duplicate/id/{target.id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_DimensionService_DuplicateDimension_1(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_DuplicateDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodPut, pattern_DimensionService_EditDimension_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/EditDimension", runtime.WithHTTPPathPattern("/v1/dimensions/name/{target.name}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/EditDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{target_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -648,33 +341,13 @@ func RegisterDimensionServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		}
 		forward_DimensionService_EditDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPut, pattern_DimensionService_EditDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/EditDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{target.id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_DimensionService_EditDimension_1(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_EditDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodDelete, pattern_DimensionService_DeleteDimension_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/DeleteDimension", runtime.WithHTTPPathPattern("/v1/dimensions/name/{name}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/DeleteDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -687,26 +360,6 @@ func RegisterDimensionServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		forward_DimensionService_DeleteDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodDelete, pattern_DimensionService_DeleteDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sro.gameserver.DimensionService/DeleteDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_DimensionService_DeleteDimension_1(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_DeleteDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -752,7 +405,7 @@ func RegisterDimensionServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/GetDimension", runtime.WithHTTPPathPattern("/v1/dimensions/name/{name}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/GetDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -764,23 +417,6 @@ func RegisterDimensionServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		forward_DimensionService_GetDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodGet, pattern_DimensionService_GetDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/GetDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_DimensionService_GetDimension_1(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_GetDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodGet, pattern_DimensionService_GetDimensions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -820,7 +456,7 @@ func RegisterDimensionServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/DuplicateDimension", runtime.WithHTTPPathPattern("/v1/dimensions/duplicate/name/{target.name}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/DuplicateDimension", runtime.WithHTTPPathPattern("/v1/dimensions/duplicate/id/{target_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -833,28 +469,11 @@ func RegisterDimensionServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		}
 		forward_DimensionService_DuplicateDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_DimensionService_DuplicateDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/DuplicateDimension", runtime.WithHTTPPathPattern("/v1/dimensions/duplicate/id/{target.id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_DimensionService_DuplicateDimension_1(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_DuplicateDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodPut, pattern_DimensionService_EditDimension_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/EditDimension", runtime.WithHTTPPathPattern("/v1/dimensions/name/{target.name}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/EditDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{target_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -867,28 +486,11 @@ func RegisterDimensionServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		}
 		forward_DimensionService_EditDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPut, pattern_DimensionService_EditDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/EditDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{target.id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_DimensionService_EditDimension_1(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_EditDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodDelete, pattern_DimensionService_DeleteDimension_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/DeleteDimension", runtime.WithHTTPPathPattern("/v1/dimensions/name/{name}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/DeleteDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -901,48 +503,23 @@ func RegisterDimensionServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		}
 		forward_DimensionService_DeleteDimension_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodDelete, pattern_DimensionService_DeleteDimension_1, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sro.gameserver.DimensionService/DeleteDimension", runtime.WithHTTPPathPattern("/v1/dimensions/id/{id}"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_DimensionService_DeleteDimension_1(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_DimensionService_DeleteDimension_1(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	return nil
 }
 
 var (
-	pattern_DimensionService_GetDimension_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 2}, []string{"v1", "dimensions", "name"}, ""))
-	pattern_DimensionService_GetDimension_1       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 2}, []string{"v1", "dimensions", "id"}, ""))
+	pattern_DimensionService_GetDimension_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 2}, []string{"v1", "dimensions", "id"}, ""))
 	pattern_DimensionService_GetDimensions_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "dimensions"}, ""))
 	pattern_DimensionService_CreateDimension_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "dimensions"}, ""))
-	pattern_DimensionService_DuplicateDimension_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "dimensions", "duplicate", "name", "target.name"}, ""))
-	pattern_DimensionService_DuplicateDimension_1 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "dimensions", "duplicate", "id", "target.id"}, ""))
-	pattern_DimensionService_EditDimension_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "dimensions", "name", "target.name"}, ""))
-	pattern_DimensionService_EditDimension_1      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "dimensions", "id", "target.id"}, ""))
-	pattern_DimensionService_DeleteDimension_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 2}, []string{"v1", "dimensions", "name"}, ""))
-	pattern_DimensionService_DeleteDimension_1    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 2}, []string{"v1", "dimensions", "id"}, ""))
+	pattern_DimensionService_DuplicateDimension_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "dimensions", "duplicate", "id", "target_id"}, ""))
+	pattern_DimensionService_EditDimension_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "dimensions", "id", "target_id"}, ""))
+	pattern_DimensionService_DeleteDimension_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 2}, []string{"v1", "dimensions", "id"}, ""))
 )
 
 var (
 	forward_DimensionService_GetDimension_0       = runtime.ForwardResponseMessage
-	forward_DimensionService_GetDimension_1       = runtime.ForwardResponseMessage
 	forward_DimensionService_GetDimensions_0      = runtime.ForwardResponseMessage
 	forward_DimensionService_CreateDimension_0    = runtime.ForwardResponseMessage
 	forward_DimensionService_DuplicateDimension_0 = runtime.ForwardResponseMessage
-	forward_DimensionService_DuplicateDimension_1 = runtime.ForwardResponseMessage
 	forward_DimensionService_EditDimension_0      = runtime.ForwardResponseMessage
-	forward_DimensionService_EditDimension_1      = runtime.ForwardResponseMessage
 	forward_DimensionService_DeleteDimension_0    = runtime.ForwardResponseMessage
-	forward_DimensionService_DeleteDimension_1    = runtime.ForwardResponseMessage
 )

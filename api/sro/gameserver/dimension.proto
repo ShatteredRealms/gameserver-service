@@ -1,16 +1,15 @@
 syntax = "proto3";
 package sro.gameserver;
-option go_package = "pkg/pb";
+option go_package = "github.com/ShatteredRealms/dimension-service/pkg/pb;pb";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "sro/globals.proto";
 
 service DimensionService {
-  rpc GetDimension(sro.DimensionTarget) returns (Dimension) {
+  rpc GetDimension(sro.TargetId) returns (Dimension) {
     option (google.api.http) = {
-      get : "/v1/dimensions/name/{name}"
-      additional_bindings : {get : "/v1/dimensions/id/{id}"}
+      get : "/v1/dimensions/id/{id}"
     };
   }
 
@@ -29,24 +28,21 @@ service DimensionService {
 
   rpc DuplicateDimension(DuplicateDimensionRequest) returns (Dimension) {
     option (google.api.http) = {
-      post : "/v1/dimensions/duplicate/name/{target.name}"
-      additional_bindings : {post : "/v1/dimensions/duplicate/id/{target.id}"}
+      post : "/v1/dimensions/duplicate/id/{target_id}"
       body : "*"
     };
   }
 
   rpc EditDimension(EditDimensionRequest) returns (Dimension) {
     option (google.api.http) = {
-      put : "/v1/dimensions/name/{target.name}"
-      additional_bindings : {put : "/v1/dimensions/id/{target.id}"}
+      put : "/v1/dimensions/id/{target_id}"
       body : "*"
     };
   }
 
-  rpc DeleteDimension(sro.DimensionTarget) returns (google.protobuf.Empty) {
+  rpc DeleteDimension(sro.TargetId) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete : "/v1/dimensions/name/{name}"
-      additional_bindings : {delete : "/v1/dimensions/id/{id}"}
+      delete : "/v1/dimensions/id/{id}"
     };
   }
 }
@@ -59,12 +55,12 @@ message CreateDimensionRequest {
 }
 
 message DuplicateDimensionRequest {
-  sro.DimensionTarget target = 1;
+  string target_id = 1;
   string name = 2;
 }
 
 message EditDimensionRequest {
-  sro.DimensionTarget target = 1;
+  string target_id = 1;
   oneof optional_name { string name = 2; }
   oneof optional_version { string version = 3; }
 
@@ -85,7 +81,7 @@ message Dimension {
   string version = 3;
 
   // All maps the realm should have available
-  repeated sro.MapTarget maps = 4;
+  repeated string map_ids = 4;
 
   // Physical server location
   string location = 6;
