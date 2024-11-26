@@ -24,7 +24,7 @@ func NewDimensionConfig(ctx context.Context) (*DimensionConfig, error) {
 		BaseConfig: cconfig.BaseConfig{
 			Server: cconfig.ServerAddress{
 				Host: "localhost",
-				Port: "8084",
+				Port: "8082",
 			},
 			Keycloak: cconfig.KeycloakConfig{
 				BaseURL:      "http://localhost:8080",
