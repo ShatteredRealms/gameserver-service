@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ShatteredRealms/dimension-service/pkg/model/game"
-	"github.com/ShatteredRealms/dimension-service/pkg/pb"
+	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
+	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	commonpb "github.com/ShatteredRealms/go-common-service/pkg/pb"
@@ -34,17 +34,14 @@ var (
 	ErrDimensionLookup   = errors.New("failed to lookup dimension")
 	ErrDimensionNotExist = errors.New("dimension does not exist")
 	ErrDimensionId       = errors.New("invalid dimension id")
-
-	ErrMapNotExit = errors.New("map does not exist")
-	ErrMapLookup  = errors.New("map lookup failed")
 )
 
 type dimensionServiceServer struct {
 	pb.UnimplementedDimensionServiceServer
-	Context *DimensionContext
+	Context *GameServerContext
 }
 
-func NewDimensionServiceServer(ctx context.Context, srvCtx *DimensionContext) (pb.DimensionServiceServer, error) {
+func NewDimensionServiceServer(ctx context.Context, srvCtx *GameServerContext) (pb.DimensionServiceServer, error) {
 	err := srvCtx.CreateRoles(ctx, &DimensionRoles)
 	if err != nil {
 		return nil, err
@@ -54,23 +51,30 @@ func NewDimensionServiceServer(ctx context.Context, srvCtx *DimensionContext) (p
 
 // CreateDimension implements pb.DimensionServiceServer.
 func (c *dimensionServiceServer) CreateDimension(ctx context.Context, request *pb.CreateDimensionRequest) (*pb.Dimension, error) {
-	err := c.validateRole(ctx, RoleDimensionManage)
+	err := c.Context.validateRole(ctx, RoleDimensionManage)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, mapId := range request.MapIds {
-		m, err := c.Context.MapService.GetMapById(ctx, mapId)
+	mapIds := make([]*uuid.UUID, len(request.MapIds))
+	for idx, mapId := range request.MapIds {
+		id, err := uuid.Parse(mapId)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, ErrMapId.Error())
+		}
+		mapIds[idx] = &id
+
+		m, err := c.Context.MapService.GetMapById(ctx, &id)
 		if err != nil {
 			log.Logger.WithContext(ctx).Errorf("%v: %v", ErrMapLookup, err)
 			return nil, status.Error(codes.Internal, fmt.Sprintf("map id %v: %s", mapId, ErrMapLookup))
 		}
 		if m == nil {
-			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("map id %v: %s", mapId, ErrMapNotExit))
+			return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("map id %v: %s", mapId, ErrMapNotExist))
 		}
 	}
 
-	dimension, err := c.Context.DimensionService.CreateDimension(ctx, request.Name, request.Version, request.Location, request.MapIds)
+	dimension, err := c.Context.DimensionService.CreateDimension(ctx, request.Name, request.Version, request.Location, mapIds)
 	if err != nil {
 		if errors.Is(err, game.ErrValidation) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -89,7 +93,7 @@ func (c *dimensionServiceServer) CreateDimension(ctx context.Context, request *p
 
 // DeleteDimension implements pb.DimensionServiceServer.
 func (c *dimensionServiceServer) DeleteDimension(ctx context.Context, request *commonpb.TargetId) (*emptypb.Empty, error) {
-	err := c.validateRole(ctx, RoleDimensionManage)
+	err := c.Context.validateRole(ctx, RoleDimensionManage)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +122,7 @@ func (c *dimensionServiceServer) DeleteDimension(ctx context.Context, request *c
 
 // DuplicateDimension implements pb.DimensionServiceServer.
 func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request *pb.DuplicateDimensionRequest) (*pb.Dimension, error) {
-	err := c.validateRole(ctx, RoleDimensionManage)
+	err := c.Context.validateRole(ctx, RoleDimensionManage)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +135,7 @@ func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request
 	dimension.Id = nil
 	dimension.Name = request.Name
 
-	mapIds := make([]string, len(dimension.Maps))
+	mapIds := make([]*uuid.UUID, len(dimension.Maps))
 	for idx, m := range dimension.Maps {
 		mapIds[idx] = m.Id
 	}
@@ -156,7 +160,7 @@ func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request
 
 // EditDimension implements pb.DimensionServiceServer.
 func (c *dimensionServiceServer) EditDimension(ctx context.Context, request *pb.EditDimensionRequest) (*pb.Dimension, error) {
-	err := c.validateRole(ctx, RoleDimensionManage)
+	err := c.Context.validateRole(ctx, RoleDimensionManage)
 	if err != nil {
 		return nil, err
 	}
@@ -178,13 +182,18 @@ func (c *dimensionServiceServer) EditDimension(ctx context.Context, request *pb.
 	if request.EditMaps {
 		maps := make([]*game.Map, len(request.MapIds))
 		for idx, mapId := range request.MapIds {
-			m, err := c.Context.MapService.GetMapById(ctx, mapId)
+			id, err := uuid.Parse(mapId)
+			if err != nil {
+				return nil, status.Error(codes.InvalidArgument, ErrMapId.Error())
+			}
+
+			m, err := c.Context.MapService.GetMapById(ctx, &id)
 			if err != nil {
 				log.Logger.WithContext(ctx).Errorf("%v: %v", ErrMapLookup, err)
 				return nil, status.Error(codes.Internal, fmt.Sprintf("map id %v: %s", mapId, ErrMapLookup))
 			}
 			if m == nil {
-				return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("map id %v: %s", mapId, ErrMapNotExit))
+				return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("map id %v: %s", mapId, ErrMapNotExist))
 			}
 			maps[idx] = m
 		}
@@ -206,7 +215,7 @@ func (c *dimensionServiceServer) EditDimension(ctx context.Context, request *pb.
 
 // GetDimension implements pb.DimensionServiceServer.
 func (c *dimensionServiceServer) GetDimension(ctx context.Context, request *commonpb.TargetId) (*pb.Dimension, error) {
-	err := c.validateRole(ctx, RoleDimensionManage)
+	err := c.Context.validateRole(ctx, RoleDimensionManage)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +230,7 @@ func (c *dimensionServiceServer) GetDimension(ctx context.Context, request *comm
 
 // GetDimensions implements pb.DimensionServiceServer.
 func (c *dimensionServiceServer) GetDimensions(ctx context.Context, request *emptypb.Empty) (*pb.Dimensions, error) {
-	err := c.validateRole(ctx, RoleDimensionManage)
+	err := c.Context.validateRole(ctx, RoleDimensionManage)
 	if err != nil {
 		return nil, err
 	}

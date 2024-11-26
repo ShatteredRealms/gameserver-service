@@ -3,15 +3,18 @@ package repository
 import (
 	"context"
 
-	"github.com/ShatteredRealms/dimension-service/pkg/model/game"
+	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
+	"github.com/google/uuid"
 )
 
 type MapRepository interface {
-	GetMapById(ctx context.Context, mapId string) (*game.Map, error)
-
 	GetMaps(ctx context.Context) (*game.Maps, error)
 
-	CreateMap(ctx context.Context, mapId string) (*game.Map, error)
+	GetMapById(ctx context.Context, mapId *uuid.UUID) (*game.Map, error)
 
-	DeleteMap(ctx context.Context, mapId string) (*game.Map, error)
+	CreateMap(ctx context.Context, m *game.Map) (*game.Map, error)
+
+	UpdateMap(ctx context.Context, m *game.Map) (*game.Map, error)
+
+	DeleteMap(ctx context.Context, mapId *uuid.UUID) (*game.Map, error)
 }

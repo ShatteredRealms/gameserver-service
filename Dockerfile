@@ -8,12 +8,12 @@ RUN go mod download
 COPY . .
 ARG APP_VERSION=v0.0.1
 RUN go build \
-	-ldflags="-X 'github.com/ShatteredRealms/dimension-service/pkg/config/default.Version=${APP_VERSION}'" \
-	-o /out/dimension ./cmd/dimension
+	-ldflags="-X 'github.com/ShatteredRealms/gameserver-service/pkg/config/default.Version=${APP_VERSION}'" \
+	-o /out/gameserver-service ./cmd/gameserver-service
 
 # Run server
 FROM alpine:3.15.0
 WORKDIR /app
-COPY --from=build /out/dimension ./
-EXPOSE 8083
-ENTRYPOINT [ "./dimension" ]
+COPY --from=build /out/gameserver-service ./
+EXPOSE 8082
+ENTRYPOINT [ "./gameserver-service" ]

@@ -5,9 +5,9 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/ShatteredRealms/dimension-service/pkg/config"
-	"github.com/ShatteredRealms/dimension-service/pkg/pb"
-	"github.com/ShatteredRealms/dimension-service/pkg/srv"
+	"github.com/ShatteredRealms/gameserver-service/pkg/config"
+	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
+	"github.com/ShatteredRealms/gameserver-service/pkg/srv"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	commonpb "github.com/ShatteredRealms/go-common-service/pkg/pb"
 	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
@@ -31,7 +31,7 @@ func main() {
 
 	srvCtx, err := srv.NewDimensionContext(ctx, cfg, config.ServiceName)
 	if err != nil {
-		log.Logger.WithContext(ctx).Errorf("dimension server context: %v", err)
+		log.Logger.WithContext(ctx).Errorf("gameserver server context: %v", err)
 		return
 	}
 	ctx, span := srvCtx.Tracer.Start(ctx, "main")
@@ -40,7 +40,7 @@ func main() {
 	log.Logger.WithContext(ctx).Infof("Starting %s service", config.ServiceName)
 
 	// OpenTelemetry setup
-	otelShutdown, err := telemetry.SetupOTelSDK(ctx, "dimension", config.Version, cfg.OpenTelemtryAddress)
+	otelShutdown, err := telemetry.SetupOTelSDK(ctx, config.ServiceName, config.Version, cfg.OpenTelemtryAddress)
 	defer func() {
 		log.Logger.Infof("Shutting down")
 		err = otelShutdown(context.Background())
@@ -77,6 +77,19 @@ func main() {
 	err = pb.RegisterDimensionServiceHandlerFromEndpoint(ctx, gwmux, cfg.Server.Address(), opts)
 	if err != nil {
 		log.Logger.WithContext(ctx).Errorf("register dimension service handler endpoint: %v", err)
+		return
+	}
+
+	// Map Service
+	mapService, err := srv.NewMapServiceServer(ctx, srvCtx)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("creating map service: %v", err)
+		return
+	}
+	pb.RegisterMapServiceServer(grpcServer, mapService)
+	err = pb.RegisterMapServiceHandlerFromEndpoint(ctx, gwmux, cfg.Server.Address(), opts)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("register map service handler endpoint: %v", err)
 		return
 	}
 

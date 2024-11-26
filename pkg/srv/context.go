@@ -4,27 +4,29 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ShatteredRealms/dimension-service/pkg/config"
-	"github.com/ShatteredRealms/dimension-service/pkg/repository"
-	"github.com/ShatteredRealms/dimension-service/pkg/service"
+	"github.com/ShatteredRealms/gameserver-service/pkg/config"
+	"github.com/ShatteredRealms/gameserver-service/pkg/repository"
+	"github.com/ShatteredRealms/gameserver-service/pkg/service"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus"
 	commonrepo "github.com/ShatteredRealms/go-common-service/pkg/repository"
 	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
 )
 
-type DimensionContext struct {
+type GameServerContext struct {
 	*commonsrv.Context
 
 	DimensionBusWriter bus.MessageBusWriter[bus.DimensionMessage]
+	MapBusWriter       bus.MessageBusWriter[bus.MapMessage]
 
 	DimensionService service.DimensionService
 	MapService       service.MapService
 }
 
-func NewDimensionContext(ctx context.Context, cfg *config.DimensionConfig, serviceName string) (*DimensionContext, error) {
-	dimensionCtx := &DimensionContext{
+func NewDimensionContext(ctx context.Context, cfg *config.DimensionConfig, serviceName string) (*GameServerContext, error) {
+	dimensionCtx := &GameServerContext{
 		Context:            commonsrv.NewContext(&cfg.BaseConfig, serviceName),
 		DimensionBusWriter: bus.NewKafkaMessageBusWriter(cfg.Kafka, bus.DimensionMessage{}),
+		MapBusWriter:       bus.NewKafkaMessageBusWriter(cfg.Kafka, bus.MapMessage{}),
 	}
 	ctx, span := dimensionCtx.Tracer.Start(ctx, "context.dimension.new")
 	defer span.End()

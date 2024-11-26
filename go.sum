@@ -66,6 +66,8 @@ github.com/ShatteredRealms/go-common-service v0.5.2 h1:MJJUheRC5vHm0FMxWZiNhRn9M
 github.com/ShatteredRealms/go-common-service v0.5.2/go.mod h1:W4AsfaI3H8OM+CuSqYOarQeWttSSBxJNujV9Tyc/FNQ=
 github.com/ShatteredRealms/go-common-service v0.5.3 h1:ZTPJwwiMQYXDE7Rsh30RxfJYTXVCGYzMgVONYaZsPHA=
 github.com/ShatteredRealms/go-common-service v0.5.3/go.mod h1:W4AsfaI3H8OM+CuSqYOarQeWttSSBxJNujV9Tyc/FNQ=
+github.com/ShatteredRealms/go-common-service v0.5.4 h1:9NKr4Xg/3mCsjs/KlhjI9Ip3rj4hY+JQvImt8XRclps=
+github.com/ShatteredRealms/go-common-service v0.5.4/go.mod h1:W4AsfaI3H8OM+CuSqYOarQeWttSSBxJNujV9Tyc/FNQ=
 github.com/WilSimpson/gocloak/v13 v13.11.2 h1:PAPQVBxj3rknQKmyaDudGYPAEn/s0fkJUGEm8iSU7xs=
 github.com/WilSimpson/gocloak/v13 v13.11.2/go.mod h1:gL+zCoQEsi6ZCsY8LNMFbOvJ6Fh0etJ9Xt+W4KaAzO8=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=

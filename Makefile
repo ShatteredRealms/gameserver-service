@@ -11,7 +11,7 @@
 # Makefile for building, running, and testing
 #
 
-APP_NAME = dimension-service
+APP_NAME = gameserver-service
 
 # Import dotenv
 ifneq (,$(wildcard ../.env))
@@ -37,7 +37,7 @@ time=$(shell date +%s)
 
 PROTO_DIR=$(ROOT_DIR)/api
 
-PROTO_FILES = "$(PROTO_DIR)/sro/gameserver/dimension.proto"
+PROTO_FILES = "$(PROTO_DIR)/sro/gameserver/dimension.proto" "$(PROTO_DIR)/sro/gameserver/map.proto"
 
 MOCK_INTERFACES = $(shell egrep -rl --include="*.go" "type (\w*) interface {" $(ROOT_DIR)/pkg | sed "s/.go$$//")
 

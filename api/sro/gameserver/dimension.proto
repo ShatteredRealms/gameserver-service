@@ -1,6 +1,6 @@
 syntax = "proto3";
 package sro.gameserver;
-option go_package = "github.com/ShatteredRealms/dimension-service/pkg/pb;pb";
+option go_package = "github.com/ShatteredRealms/gameserver-service/pkg/pb;pb";
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";

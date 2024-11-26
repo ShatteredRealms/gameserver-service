@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/ShatteredRealms/dimension-service/pkg/model/game"
+	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/google/uuid"
 )
 

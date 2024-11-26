@@ -8,12 +8,12 @@ import (
 	"github.com/WilSimpson/gocloak/v13"
 )
 
-func (c *dimensionServiceServer) validateRole(ctx context.Context, role *gocloak.Role) error {
+func (c *GameServerContext) validateRole(ctx context.Context, role *gocloak.Role) error {
 	claims, ok := auth.RetrieveClaims(ctx)
 	if !ok {
 		return commonsrv.ErrPermissionDenied
 	}
-	if !claims.HasResourceRole(role, c.Context.Config.Keycloak.ClientId) {
+	if !claims.HasResourceRole(role, c.Config.Keycloak.ClientId) {
 		return commonsrv.ErrPermissionDenied
 	}
 	return nil

@@ -2,123 +2,63 @@
   "openapi": "3.0.1",
   "components": {
     "schemas": {
-      "sro.gameserver.CreateDimensionRequest": {
+      "sro.gameserver.CreateMapRequest": {
         "properties": {
-          "location": {
+          "mapPath": {
             "type": "string"
-          },
-          "mapIds": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
           },
           "name": {
-            "type": "string"
-          },
-          "version": {
             "type": "string"
           }
         },
         "type": "object"
       },
-      "sro.gameserver.Dimension": {
+      "sro.gameserver.EditMapRequest": {
+        "properties": {
+          "mapPath": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "sro.gameserver.Map": {
         "properties": {
           "id": {
-            "description": "Unique id for the dimension",
             "type": "string"
           },
-          "location": {
-            "description": "Physical server location",
+          "mapPath": {
             "type": "string"
-          },
-          "mapIds": {
-            "description": "All maps the realm should have available",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
           },
           "name": {
-            "description": "Unique name of the dimension",
-            "type": "string"
-          },
-          "version": {
-            "description": "Server version used for each server instance",
             "type": "string"
           }
         },
         "type": "object"
       },
-      "sro.gameserver.Dimensions": {
+      "sro.gameserver.Maps": {
         "properties": {
-          "dimensions": {
+          "maps": {
             "items": {
               "properties": {
                 "id": {
-                  "description": "Unique id for the dimension",
                   "type": "string"
                 },
-                "location": {
-                  "description": "Physical server location",
+                "mapPath": {
                   "type": "string"
-                },
-                "mapIds": {
-                  "description": "All maps the realm should have available",
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
                 },
                 "name": {
-                  "description": "Unique name of the dimension",
-                  "type": "string"
-                },
-                "version": {
-                  "description": "Server version used for each server instance",
                   "type": "string"
                 }
               },
               "type": "object"
             },
             "type": "array"
-          }
-        },
-        "type": "object"
-      },
-      "sro.gameserver.DuplicateDimensionRequest": {
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "targetId": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "sro.gameserver.EditDimensionRequest": {
-        "properties": {
-          "editMaps": {
-            "type": "boolean"
-          },
-          "location": {
-            "type": "string"
-          },
-          "mapIds": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "name": {
-            "type": "string"
-          },
-          "targetId": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
           }
         },
         "type": "object"

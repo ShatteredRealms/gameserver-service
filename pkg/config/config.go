@@ -9,7 +9,7 @@ import (
 
 var (
 	Version     = "v1.0.0"
-	ServiceName = "DimensionService"
+	ServiceName = "GameServerService"
 )
 
 type DimensionConfig struct {
@@ -30,7 +30,7 @@ func NewDimensionConfig(ctx context.Context) (*DimensionConfig, error) {
 				BaseURL:      "http://localhost:8080",
 				Realm:        "default",
 				Id:           "ae593ef2-49d7-4ca1-8b8b-226f4e95b509",
-				ClientId:     "sro-dimension-service",
+				ClientId:     "sro-gameserver-service",
 				ClientSecret: "**********",
 			},
 			Mode:                "local",
@@ -49,7 +49,7 @@ func NewDimensionConfig(ctx context.Context) (*DimensionConfig, error) {
 					Host: "localhost",
 					Port: "5432",
 				},
-				Name:     "dimension_service",
+				Name:     "gameserver_service",
 				Username: "postgres",
 				Password: "password",
 			},
@@ -65,6 +65,6 @@ func NewDimensionConfig(ctx context.Context) (*DimensionConfig, error) {
 		GameServerImage: "sro-gameserver",
 	}
 
-	err := cconfig.BindConfigEnvs(ctx, "sro-dimension", config)
+	err := cconfig.BindConfigEnvs(ctx, "sro-gameserver-service", config)
 	return config, err
 }

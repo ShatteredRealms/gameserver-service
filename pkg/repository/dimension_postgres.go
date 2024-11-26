@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ShatteredRealms/dimension-service/pkg/model/game"
+	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/ShatteredRealms/go-common-service/pkg/srospan"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/trace"

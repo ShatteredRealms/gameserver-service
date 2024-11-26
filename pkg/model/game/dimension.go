@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ShatteredRealms/dimension-service/pkg/pb"
+	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
 	"github.com/ShatteredRealms/go-common-service/pkg/model"
 )
 
@@ -52,7 +52,7 @@ func (dimension *Dimension) ValidateName() error {
 func (dimension *Dimension) ToPb() *pb.Dimension {
 	maps := make([]string, len(dimension.Maps))
 	for _, m := range dimension.Maps {
-		maps = append(maps, m.Id)
+		maps = append(maps, m.Id.String())
 	}
 
 	return &pb.Dimension{
