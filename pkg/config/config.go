@@ -27,7 +27,7 @@ func NewDimensionConfig(ctx context.Context) (*DimensionConfig, error) {
 				Port: "8084",
 			},
 			Keycloak: cconfig.KeycloakConfig{
-				BaseURL:      "http://localhost:8080/",
+				BaseURL:      "http://localhost:8080",
 				Realm:        "default",
 				Id:           "ae593ef2-49d7-4ca1-8b8b-226f4e95b509",
 				ClientId:     "sro-dimension-service",
