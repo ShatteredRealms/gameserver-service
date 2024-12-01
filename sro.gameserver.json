@@ -2,63 +2,73 @@
   "openapi": "3.0.1",
   "components": {
     "schemas": {
-      "sro.gameserver.CreateMapRequest": {
+      "sro.gameserver.ConnectGameServerResponse": {
         "properties": {
-          "mapPath": {
+          "address": {
             "type": "string"
           },
-          "name": {
+          "connectionId": {
             "type": "string"
+          },
+          "port": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
           }
         },
         "type": "object"
       },
-      "sro.gameserver.EditMapRequest": {
+      "sro.gameserver.ConnectionStatus": {
         "properties": {
-          "mapPath": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "targetId": {
-            "type": "string"
+          "online": {
+            "type": "boolean"
           }
         },
         "type": "object"
       },
-      "sro.gameserver.Map": {
+      "sro.gameserver.TransferPlayerRequest": {
         "properties": {
-          "id": {
+          "character": {
             "type": "string"
           },
-          "mapPath": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "sro.gameserver.Maps": {
-        "properties": {
-          "maps": {
-            "items": {
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "mapPath": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                }
+          "location": {
+            "properties": {
+              "pitch": {
+                "type": "number"
               },
-              "type": "object"
+              "roll": {
+                "type": "number"
+              },
+              "world": {
+                "type": "string"
+              },
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "yaw": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
             },
-            "type": "array"
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "sro.gameserver.VerifyConnectRequest": {
+        "properties": {
+          "connectionId": {
+            "description": "Connection id provided to the server by a pending connecting target",
+            "type": "string"
+          },
+          "serverName": {
+            "description": "Name of server verifying the connection request",
+            "type": "string"
           }
         },
         "type": "object"
