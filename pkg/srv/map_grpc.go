@@ -6,7 +6,7 @@ import (
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
-	"github.com/ShatteredRealms/go-common-service/pkg/bus"
+	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/mapbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	commonpb "github.com/ShatteredRealms/go-common-service/pkg/pb"
 	"github.com/ShatteredRealms/go-common-service/pkg/util"
@@ -56,7 +56,7 @@ func (s *mapServiceServer) CreateMap(ctx context.Context, request *pb.CreateMapR
 		return nil, status.Error(codes.Internal, ErrMapCreate.Error())
 	}
 
-	s.Context.MapBusWriter.Publish(ctx, bus.MapMessage{
+	s.Context.MapBusWriter.Publish(ctx, mapbus.Message{
 		Id:      m.Id.String(),
 		Deleted: false,
 	})
@@ -85,7 +85,7 @@ func (s *mapServiceServer) DeleteMap(ctx context.Context, request *commonpb.Targ
 		return nil, status.Error(codes.NotFound, ErrMapNotExist.Error())
 	}
 
-	s.Context.MapBusWriter.Publish(ctx, bus.MapMessage{
+	s.Context.MapBusWriter.Publish(ctx, mapbus.Message{
 		Id:      m.Id.String(),
 		Deleted: true,
 	})

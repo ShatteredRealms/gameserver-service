@@ -7,7 +7,7 @@ import (
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
-	"github.com/ShatteredRealms/go-common-service/pkg/bus"
+	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/dimensionbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	commonpb "github.com/ShatteredRealms/go-common-service/pkg/pb"
 	"github.com/ShatteredRealms/go-common-service/pkg/util"
@@ -83,7 +83,7 @@ func (c *dimensionServiceServer) CreateDimension(ctx context.Context, request *p
 		return nil, status.Error(codes.Internal, ErrDimensionCreate.Error())
 	}
 
-	c.Context.DimensionBusWriter.Publish(ctx, bus.DimensionMessage{
+	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
 		Id:      dimension.Id.String(),
 		Deleted: false,
 	})
@@ -112,7 +112,7 @@ func (c *dimensionServiceServer) DeleteDimension(ctx context.Context, request *c
 		return nil, status.Error(codes.NotFound, ErrDimensionNotExist.Error())
 	}
 
-	c.Context.DimensionBusWriter.Publish(ctx, bus.DimensionMessage{
+	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
 		Id:      dimension.Id.String(),
 		Deleted: true,
 	})
@@ -150,7 +150,7 @@ func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request
 		return nil, status.Error(codes.Internal, ErrDimensionCreate.Error())
 	}
 
-	c.Context.DimensionBusWriter.Publish(ctx, bus.DimensionMessage{
+	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
 		Id:      newDimension.Id.String(),
 		Deleted: false,
 	})

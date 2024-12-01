@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"agones.dev/agones/pkg/client/clientset/versioned"
 	"github.com/ShatteredRealms/gameserver-service/pkg/config"
 	"github.com/ShatteredRealms/gameserver-service/pkg/repository"
 	"github.com/ShatteredRealms/gameserver-service/pkg/service"
@@ -12,10 +11,8 @@ import (
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/character/characterbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/dimensionbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/mapbus"
-	commoncfg "github.com/ShatteredRealms/go-common-service/pkg/config"
 	commonrepo "github.com/ShatteredRealms/go-common-service/pkg/repository"
 	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
-	"k8s.io/client-go/rest"
 )
 
 type GameServerContext struct {
@@ -27,13 +24,12 @@ type GameServerContext struct {
 	DimensionService  service.DimensionService
 	MapService        service.MapService
 	ConnectionService service.ConnectionService
+	GsmService        service.GameServerManagerService
 
 	CharacterService characterbus.Service
-
-	Agones *AgonesClient
 }
 
-func NewDimensionContext(ctx context.Context, cfg *config.DimensionConfig, serviceName string) (*GameServerContext, error) {
+func NewDimensionContext(ctx context.Context, cfg *config.GameServerConfig, serviceName string) (*GameServerContext, error) {
 	dimensionCtx := &GameServerContext{
 		Context:            commonsrv.NewContext(&cfg.BaseConfig, serviceName),
 		DimensionBusWriter: bus.NewKafkaMessageBusWriter(cfg.Kafka, dimensionbus.Message{}),
@@ -60,17 +56,13 @@ func NewDimensionContext(ctx context.Context, cfg *config.DimensionConfig, servi
 		characterbus.NewPostgresRepository(pg),
 		bus.NewKafkaMessageBusReader(cfg.Kafka, serviceName, characterbus.Message{}),
 	)
-
-	if cfg.Mode != commoncfg.ModeLocal {
-		conf, err := rest.InClusterConfig()
-		if err != nil {
-			return nil, fmt.Errorf("in cluster config: %w", err)
-		}
-
-		dimensionCtx.Agones, err := versioned.NewForConfig(conf)
-		if err != nil {
-			return nil, fmt.Errorf("agones config: %w", err)
-		}
+	dimensionCtx.GsmService, err = service.NewGameServerManagerService(
+		cfg.GSManager,
+		dimensionCtx.MapService,
+		dimensionCtx.DimensionService,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("new gsm service: %w", err)
 	}
 
 	return dimensionCtx, nil

@@ -85,8 +85,7 @@ func (c *connectionServiceServer) ConnectGameServer(
 		}, nil
 	}
 
-	out, err := c.Context
-
+	return nil, status.Error(codes.Unimplemented, "remote connections not supported")
 }
 
 // IsCharacterPlaying implements pb.ConnectionServiceServer.
