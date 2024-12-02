@@ -24,7 +24,8 @@ type GameServerContext struct {
 	DimensionService  service.DimensionService
 	MapService        service.MapService
 	ConnectionService service.ConnectionService
-	GsmService        service.GameServerManagerService
+
+	GsmService *service.GsmService
 
 	CharacterService characterbus.Service
 }
