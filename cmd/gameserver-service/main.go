@@ -29,7 +29,7 @@ func main() {
 		return
 	}
 
-	srvCtx, err := srv.NewDimensionContext(ctx, cfg, config.ServiceName)
+	srvCtx, err := srv.NewGameServerContext(ctx, cfg, config.ServiceName)
 	if err != nil {
 		log.Logger.WithContext(ctx).Errorf("gameserver server context: %v", err)
 		return

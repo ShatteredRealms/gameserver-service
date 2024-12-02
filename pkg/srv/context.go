@@ -24,19 +24,18 @@ type GameServerContext struct {
 	DimensionService  service.DimensionService
 	MapService        service.MapService
 	ConnectionService service.ConnectionService
-
-	GsmService *service.GsmService
+	GsmService               service.GameServerManagerService
 
 	CharacterService characterbus.Service
 }
 
-func NewDimensionContext(ctx context.Context, cfg *config.GameServerConfig, serviceName string) (*GameServerContext, error) {
-	dimensionCtx := &GameServerContext{
+func NewGameServerContext(ctx context.Context, cfg *config.GameServerConfig, serviceName string) (*GameServerContext, error) {
+	gsCtx := &GameServerContext{
 		Context:            commonsrv.NewContext(&cfg.BaseConfig, serviceName),
 		DimensionBusWriter: bus.NewKafkaMessageBusWriter(cfg.Kafka, dimensionbus.Message{}),
 		MapBusWriter:       bus.NewKafkaMessageBusWriter(cfg.Kafka, mapbus.Message{}),
 	}
-	ctx, span := dimensionCtx.Tracer.Start(ctx, "context.dimension.new")
+	ctx, span := gsCtx.Tracer.Start(ctx, "context.dimension.new")
 	defer span.End()
 
 	pg, err := commonrepo.ConnectDB(ctx, cfg.Postgres, cfg.Redis)
@@ -44,27 +43,26 @@ func NewDimensionContext(ctx context.Context, cfg *config.GameServerConfig, serv
 		return nil, fmt.Errorf("connect db: %w", err)
 	}
 
-	dimensionCtx.DimensionService = service.NewDimensionService(
+	gsCtx.DimensionService = service.NewDimensionService(
 		repository.NewPostgresDimensionRepository(pg),
 	)
-	dimensionCtx.MapService = service.NewMapService(
+	gsCtx.MapService = service.NewMapService(
 		repository.NewPostgresMapRepository(pg),
 	)
-	dimensionCtx.ConnectionService = service.NewConnectionService(
+	gsCtx.ConnectionService = service.NewConnectionService(
 		repository.NewPostgresConnectionRepository(pg),
 	)
-	dimensionCtx.CharacterService = characterbus.NewService(
+	gsCtx.GsmService, err = service.NewGameServerManagerService(
+		cfg.GsmConfig,
+	)
+	gsCtx.CharacterService = characterbus.NewService(
 		characterbus.NewPostgresRepository(pg),
 		bus.NewKafkaMessageBusReader(cfg.Kafka, serviceName, characterbus.Message{}),
-	)
-	dimensionCtx.GsmService, err = service.NewGameServerManagerService(
-		cfg.GSManager,
-		dimensionCtx.MapService,
-		dimensionCtx.DimensionService,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("new gsm service: %w", err)
 	}
+	gsCtx.GsmService.Start(ctx)
 
-	return dimensionCtx, nil
+	return gsCtx, nil
 }

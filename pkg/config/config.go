@@ -16,6 +16,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+const (
+	ManagedLabelKey   = "shatteredrealms.online/managed"
+	ManagedLabelValue = "gameserver-service"
+
+	MapLabel       = "shatteredrealms.online/map"
+	DimensionLabel = "shatteredrealms.online/dimension"
+)
+
 var (
 	Version     = "v1.0.0"
 	ServiceName = "GameServerService"
@@ -25,7 +33,7 @@ type GameServerConfig struct {
 	cconfig.BaseConfig `yaml:",inline" dimensionstructure:",squash"`
 	Postgres           cconfig.DBPoolConfig    `yaml:"postgres"`
 	Redis              cconfig.DBPoolConfig    `yaml:"redis"`
-	GSManager          GameServerManagerConfig `yaml:"gameServerManager"`
+	GsmConfig          GameServerManagerConfig `yaml:"gameServerManager"`
 }
 
 type GameServerManagerConfig struct {
@@ -78,7 +86,7 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 				},
 			},
 		},
-		GSManager: GameServerManagerConfig{
+		GsmConfig: GameServerManagerConfig{
 			GameServerImage:       "sro-gameserver",
 			FleetPrefix:           "sro-f",
 			FleetAutoscalerPrefix: "sro-fas",
@@ -90,14 +98,13 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 }
 
 func (c *GameServerManagerConfig) GetFleetTemplate(dimension *game.Dimension, m *game.Map) *v1.Fleet {
+	labels := c.getLabels(dimension, m)
 	return &v1.Fleet{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      c.getFleetName(dimension, m),
 			Namespace: c.GameServerNamespace,
-			Labels: map[string]string{
-				"shatteredrealms.online/managed": "gameserver-service",
-			},
+			Labels:    labels,
 		},
 		Spec: v1.FleetSpec{
 			Replicas:   1,
@@ -135,6 +142,7 @@ func (c *GameServerManagerConfig) GetFleetTemplate(dimension *game.Dimension, m 
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      c.getGameServerName(dimension, m),
 							Namespace: c.GameServerNamespace,
+							Labels:    labels,
 						},
 						Spec: corev1.PodSpec{
 							Containers: []corev1.Container{
@@ -162,10 +170,12 @@ func (c *GameServerManagerConfig) GetFleetTemplate(dimension *game.Dimension, m 
 }
 
 func (c *GameServerManagerConfig) GetFleetAutoscalerTemplate(dimension *game.Dimension, m *game.Map) *autoscalingv1.FleetAutoscaler {
+	labels := c.getLabels(dimension, m)
 	return &autoscalingv1.FleetAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      c.getFleetAutoscalerName(dimension, m),
 			Namespace: c.GameServerNamespace,
+			Labels:    labels,
 		},
 		Spec: autoscalingv1.FleetAutoscalerSpec{
 			FleetName: c.getFleetName(dimension, m),
@@ -182,7 +192,14 @@ func (c *GameServerManagerConfig) GetFleetAutoscalerTemplate(dimension *game.Dim
 			},
 		},
 	}
+}
 
+func (c *GameServerManagerConfig) getLabels(dimension *game.Dimension, m *game.Map) map[string]string {
+	return map[string]string{
+		ManagedLabelKey: ManagedLabelValue,
+		MapLabel:        m.Id.String(),
+		DimensionLabel:  dimension.Id.String(),
+	}
 }
 
 func (c *GameServerManagerConfig) getGameServerName(dimension *game.Dimension, m *game.Map) string {
