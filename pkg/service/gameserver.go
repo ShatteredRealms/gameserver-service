@@ -28,9 +28,21 @@ type dimensionMap struct {
 }
 
 type GameServerManagerService interface {
-	RequestConnection(ctx context.Context, characterId, dimensionId, mapId string) (*aav1.GameServerAllocation, error)
-	DimensionMapChanged(dimension *game.Dimension, m *game.Map, created bool)
+	// FindAvailableGameServers will find the best game server(s) for the given dimension and map.
+	FindAvailableGameServers(ctx context.Context, dimensionId, mapId string) (*aav1.GameServerAllocation, error)
+
+	// DimensionMapChanged creates or deletes a game server fleets and autoscalers for the given dimension and game based on created.
+	DimensionMapChanged(ctx context.Context, dimension *game.Dimension, m *game.Map, created bool)
+
+	// SyncGameServers will create or delete game servers based on the maps in the dimension.
+	// If the returned arrays is nil, then no maps were created or deleted and error will be returned.
+	// Returns the maps that attempted to be created and deleted and any errors that occurred.
+	SyncGameServers(ctx context.Context, dimension *game.Dimension) (mapsCreated []string, mapsDeleted []string, err error)
+
+	// Start starts processing incoming dimension map changes on seperate threads.
 	Start(ctx context.Context)
+
+	// Stop stops processing incoming dimension map changes.
 	Stop()
 }
 
@@ -45,22 +57,111 @@ type gsmService struct {
 	cancelFunc           context.CancelFunc
 }
 
+// DeleteExtra implements GameServerManagerService.
+func (g *gsmService) SyncGameServers(
+	ctx context.Context,
+	dimension *game.Dimension,
+) (mapsCreated []string, mapsDeleted []string, err error) {
+	pendingCreation := make([]*game.Map, 0)
+	mapsCreated = make([]string, 0)
+	mapsDeleted = make([]string, 0)
+
+	// Find all the fleets that are associated with the dimension
+	labels, err := metav1.LabelSelectorAsSelector(
+		&metav1.LabelSelector{
+			MatchLabels: g.config.GetLabels(dimension.Id.String(), ""),
+		},
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("create label selector: %w", err)
+	}
+
+	fleetList, err := g.agones.AgonesV1().Fleets(g.config.GameServerNamespace).List(ctx, metav1.ListOptions{
+		LabelSelector: labels.String(),
+	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("list fleets: %w", err)
+	}
+
+	// Find maps that are required, but not created and add them to a pending creation list.
+	// Also, remove items from the fleetList that already exist so the remaining items can be deleted.
+	for _, m := range dimension.Maps {
+		found := false
+		for idx, fleet := range fleetList.Items {
+			if fleet.Labels[config.MapLabel] == m.Id.String() {
+				found = true
+				fleetList.Items[idx] = fleetList.Items[len(fleetList.Items)-1]
+				fleetList.Items = fleetList.Items[:len(fleetList.Items)-1]
+				break
+			}
+		}
+
+		if !found {
+			pendingCreation = append(pendingCreation, m)
+		}
+	}
+
+	var errs error
+
+	// Delete any remaining fleets and their associated autoscalers because they are not needed
+	for _, fleet := range fleetList.Items {
+		mapId := fleet.Labels[config.MapLabel]
+		mapsDeleted = append(mapsDeleted, mapId)
+		mapLabels, err := metav1.LabelSelectorAsSelector(
+			&metav1.LabelSelector{
+				MatchLabels: g.config.GetLabels("", mapId),
+			},
+		)
+		if err != nil {
+			errs = errors.Join(errs, fmt.Errorf("create label selector for map '%s': %w", mapId, err))
+		} else {
+			err = g.agones.AutoscalingV1().
+				FleetAutoscalers(g.config.GameServerNamespace).
+				DeleteCollection(
+					ctx,
+					metav1.DeleteOptions{},
+					metav1.ListOptions{
+						LabelSelector: mapLabels.String(),
+					},
+				)
+			if err != nil {
+				errs = errors.Join(errs, fmt.Errorf("delete fleet autoscaler for map '%s': %w", mapId, err))
+			}
+
+			err = g.agones.AgonesV1().Fleets(g.config.GameServerNamespace).Delete(ctx, fleet.Name, metav1.DeleteOptions{})
+			if err != nil {
+				errs = errors.Join(errs, fmt.Errorf("delete fleet '%s': %w", fleet.Name, err))
+			}
+		}
+	}
+
+	// Create any missing gameserver fleets and autoscalers
+	for _, m := range pendingCreation {
+		mapsCreated = append(mapsCreated, m.Id.String())
+		err := g.createGameServers(ctx, dimension, m)
+		if err != nil {
+			errs = errors.Join(errs, fmt.Errorf("create gameserver for map '%s': %w", m.Id.String(), err))
+		}
+	}
+
+	return mapsCreated, mapsDeleted, errs
+}
+
 // DimensionMapChanged implements GameServerManagerService.
-func (g *gsmService) DimensionMapChanged(dimension *game.Dimension, m *game.Map, created bool) {
-	g.DimensionMapsChanged <- dimensionMap{
-		Dimension: dimension,
-		Map:       m,
-		Created:   created,
+func (g *gsmService) DimensionMapChanged(ctx context.Context, dimension *game.Dimension, m *game.Map, created bool) {
+	if g.ctx != nil {
+		g.DimensionMapsChanged <- dimensionMap{
+			Dimension: dimension,
+			Map:       m,
+			Created:   created,
+		}
+	} else {
+		log.Logger.WithContext(ctx).Warnf("game server manager service not started")
 	}
 }
 
-// RequestConnection implements GameServerManagerService.
-func (g *gsmService) RequestConnection(ctx context.Context, characterId, dimensionId, mapId string) (*aav1.GameServerAllocation, error) {
-	log.Logger.WithContext(ctx).Debugf(
-		"character '%s' in dimension '%s' requesting connection to gameserver with map '%s'",
-		characterId, dimensionId, mapId,
-	)
-
+// FindAvailableGameServers implements GameServerManagerService.
+func (g *gsmService) FindAvailableGameServers(ctx context.Context, dimensionId, mapId string) (*aav1.GameServerAllocation, error) {
 	allocatedState := v1.GameServerStateAllocated
 	readyState := v1.GameServerStateReady
 	gsAlloc, err := g.agones.AllocationV1().GameServerAllocations(g.config.GameServerNamespace).Create(

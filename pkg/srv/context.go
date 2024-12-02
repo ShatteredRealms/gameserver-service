@@ -11,6 +11,7 @@ import (
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/character/characterbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/dimensionbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/mapbus"
+	commoncfg "github.com/ShatteredRealms/go-common-service/pkg/config"
 	commonrepo "github.com/ShatteredRealms/go-common-service/pkg/repository"
 	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
 )
@@ -24,7 +25,7 @@ type GameServerContext struct {
 	DimensionService  service.DimensionService
 	MapService        service.MapService
 	ConnectionService service.ConnectionService
-	GsmService               service.GameServerManagerService
+	GsmService        service.GameServerManagerService
 
 	CharacterService characterbus.Service
 }
@@ -52,17 +53,25 @@ func NewGameServerContext(ctx context.Context, cfg *config.GameServerConfig, ser
 	gsCtx.ConnectionService = service.NewConnectionService(
 		repository.NewPostgresConnectionRepository(pg),
 	)
-	gsCtx.GsmService, err = service.NewGameServerManagerService(
-		cfg.GsmConfig,
-	)
 	gsCtx.CharacterService = characterbus.NewService(
 		characterbus.NewPostgresRepository(pg),
 		bus.NewKafkaMessageBusReader(cfg.Kafka, serviceName, characterbus.Message{}),
 	)
-	if err != nil {
-		return nil, fmt.Errorf("new gsm service: %w", err)
+	gsCtx.CharacterService.StartProcessing(ctx)
+
+	if gsCtx.UsingAgones() {
+		gsCtx.GsmService, err = service.NewGameServerManagerService(
+			cfg.GsmConfig,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("new gsm service: %w", err)
+		}
+		gsCtx.GsmService.Start(ctx)
 	}
-	gsCtx.GsmService.Start(ctx)
 
 	return gsCtx, nil
+}
+
+func (gsCtx *GameServerContext) UsingAgones() bool {
+	return gsCtx.Config.Mode != commoncfg.ModeLocal
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
 	"github.com/ShatteredRealms/go-common-service/pkg/model"
+	"github.com/google/uuid"
 )
 
 const (
@@ -59,6 +60,21 @@ func (m *Map) ValidateName() error {
 	}
 
 	return nil
+}
+
+func (m *Maps) HasMap(id *uuid.UUID) (int, bool) {
+	for idx, mapItem := range *m {
+		if mapItem.Id == id {
+			return idx, true
+		}
+	}
+
+	return -1, false
+}
+
+func (m *Maps) RemoveElement(idx int) {
+	(*m)[idx] = (*m)[len(*m)-1]
+	*m = (*m)[:len(*m)-1]
 }
 
 func (m *Map) ToPb() *pb.Map {

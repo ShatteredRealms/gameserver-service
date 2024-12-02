@@ -28,7 +28,7 @@ service DimensionService {
 
   rpc DuplicateDimension(DuplicateDimensionRequest) returns (Dimension) {
     option (google.api.http) = {
-      post : "/v1/dimensions/duplicate/id/{target_id}"
+      post : "/v1/dimensions/id/{target_id}/duplicate"
       body : "*"
     };
   }
@@ -43,6 +43,12 @@ service DimensionService {
   rpc DeleteDimension(sro.TargetId) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete : "/v1/dimensions/id/{id}"
+    };
+  }
+
+  rpc GameServerUpdate(sro.TargetId) returns (GameServerUpdateResponse) {
+    option (google.api.http) = {
+      post : "/v1/dimensions/id/{id}/update"
     };
   }
 }
@@ -88,3 +94,8 @@ message Dimension {
 }
 
 message Dimensions { repeated Dimension dimensions = 1; }
+
+message GameServerUpdateResponse {
+  repeated string map_ids_created = 1;
+  repeated string map_ids_deleted = 2;
+}

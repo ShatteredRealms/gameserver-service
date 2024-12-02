@@ -8,6 +8,7 @@ import (
 	v1 "agones.dev/agones/pkg/apis/agones/v1"
 	autoscalingv1 "agones.dev/agones/pkg/apis/autoscaling/v1"
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
+	"github.com/ShatteredRealms/go-common-service/pkg/config"
 	cconfig "github.com/ShatteredRealms/go-common-service/pkg/config"
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
@@ -57,8 +58,8 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 				ClientId:     "sro-gameserver-service",
 				ClientSecret: "**********",
 			},
-			Mode:                "local",
-			LogLevel:            logrus.DebugLevel,
+			Mode:                config.ModeLocal,
+			LogLevel:            logrus.InfoLevel,
 			OpenTelemtryAddress: "localhost:4317",
 			Kafka: cconfig.ServerAddresses{
 				{
@@ -98,7 +99,7 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 }
 
 func (c *GameServerManagerConfig) GetFleetTemplate(dimension *game.Dimension, m *game.Map) *v1.Fleet {
-	labels := c.getLabels(dimension, m)
+	labels := c.GetLabels(dimension.Id.String(), m.Id.String())
 	return &v1.Fleet{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
@@ -170,7 +171,7 @@ func (c *GameServerManagerConfig) GetFleetTemplate(dimension *game.Dimension, m 
 }
 
 func (c *GameServerManagerConfig) GetFleetAutoscalerTemplate(dimension *game.Dimension, m *game.Map) *autoscalingv1.FleetAutoscaler {
-	labels := c.getLabels(dimension, m)
+	labels := c.GetLabels(dimension.Id.String(), m.Id.String())
 	return &autoscalingv1.FleetAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      c.getFleetAutoscalerName(dimension, m),
@@ -194,12 +195,17 @@ func (c *GameServerManagerConfig) GetFleetAutoscalerTemplate(dimension *game.Dim
 	}
 }
 
-func (c *GameServerManagerConfig) getLabels(dimension *game.Dimension, m *game.Map) map[string]string {
-	return map[string]string{
+func (c *GameServerManagerConfig) GetLabels(dimensionId string, mapId string) map[string]string {
+	labels := map[string]string{
 		ManagedLabelKey: ManagedLabelValue,
-		MapLabel:        m.Id.String(),
-		DimensionLabel:  dimension.Id.String(),
 	}
+	if dimensionId != "" {
+		labels[DimensionLabel] = dimensionId
+	}
+	if mapId != "" {
+		labels[MapLabel] = mapId
+	}
+	return labels
 }
 
 func (c *GameServerManagerConfig) getGameServerName(dimension *game.Dimension, m *game.Map) string {

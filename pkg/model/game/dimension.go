@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	DimensionNameRegex = "^[a-zA-Z0-9_- ]+$"
+	DimensionNameRegex = "^[a-zA-Z0-9_-]+$"
 
 	// ErrDimensionNameToShort thrown when a dimension name is too short
 	ErrDimensionNameToShort = fmt.Errorf("%w: name must be at least %d characters", ErrValidation, MinDimensionNameLength)

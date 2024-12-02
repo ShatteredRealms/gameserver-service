@@ -88,6 +88,12 @@ func (c *dimensionServiceServer) CreateDimension(ctx context.Context, request *p
 		Deleted: false,
 	})
 
+	if c.Context.UsingAgones() {
+		for _, m := range dimension.Maps {
+			c.Context.GsmService.DimensionMapChanged(ctx, dimension, m, true)
+		}
+	}
+
 	return dimension.ToPb(), nil
 }
 
@@ -116,6 +122,12 @@ func (c *dimensionServiceServer) DeleteDimension(ctx context.Context, request *c
 		Id:      dimension.Id.String(),
 		Deleted: true,
 	})
+
+	if c.Context.UsingAgones() {
+		for _, m := range dimension.Maps {
+			c.Context.GsmService.DimensionMapChanged(ctx, dimension, m, false)
+		}
+	}
 
 	return &emptypb.Empty{}, nil
 }
@@ -155,6 +167,12 @@ func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request
 		Deleted: false,
 	})
 
+	if c.Context.UsingAgones() {
+		for _, m := range newDimension.Maps {
+			c.Context.GsmService.DimensionMapChanged(ctx, newDimension, m, true)
+		}
+	}
+
 	return newDimension.ToPb(), nil
 }
 
@@ -170,6 +188,8 @@ func (c *dimensionServiceServer) EditDimension(ctx context.Context, request *pb.
 		return nil, err
 	}
 
+	mapsAdded := make(game.Maps, 0)
+	mapsRemoved := make(game.Maps, 0)
 	if request.OptionalName != nil {
 		dimension.Name = request.GetName()
 	}
@@ -180,7 +200,7 @@ func (c *dimensionServiceServer) EditDimension(ctx context.Context, request *pb.
 		dimension.Version = request.GetVersion()
 	}
 	if request.EditMaps {
-		maps := make([]*game.Map, len(request.MapIds))
+		maps := make(game.Maps, len(request.MapIds))
 		for idx, mapId := range request.MapIds {
 			id, err := uuid.Parse(mapId)
 			if err != nil {
@@ -197,6 +217,17 @@ func (c *dimensionServiceServer) EditDimension(ctx context.Context, request *pb.
 			}
 			maps[idx] = m
 		}
+		for _, m := range maps {
+			idx, found := dimension.Maps.HasMap(m.Id)
+			if found {
+				dimension.Maps.RemoveElement(idx)
+			} else {
+				mapsAdded = append(mapsAdded, m)
+			}
+		}
+		for _, m := range dimension.Maps {
+			mapsRemoved = append(mapsRemoved, m)
+		}
 		dimension.Maps = maps
 	}
 
@@ -208,6 +239,15 @@ func (c *dimensionServiceServer) EditDimension(ctx context.Context, request *pb.
 
 		log.Logger.WithContext(ctx).Errorf("%v: %v", ErrDimensionEdit, err)
 		return nil, status.Error(codes.Internal, ErrDimensionEdit.Error())
+	}
+
+	if c.Context.UsingAgones() {
+		for _, m := range mapsAdded {
+			c.Context.GsmService.DimensionMapChanged(ctx, dimension, m, true)
+		}
+		for _, m := range mapsRemoved {
+			c.Context.GsmService.DimensionMapChanged(ctx, dimension, m, false)
+		}
 	}
 
 	return dimension.ToPb(), nil
@@ -226,6 +266,38 @@ func (c *dimensionServiceServer) GetDimension(ctx context.Context, request *comm
 	}
 
 	return dimension.ToPb(), nil
+}
+
+// GameServerUpdate implements pb.DimensionServiceServer.
+func (c *dimensionServiceServer) GameServerUpdate(ctx context.Context, request *commonpb.TargetId) (*pb.GameServerUpdateResponse, error) {
+	err := c.Context.validateRole(ctx, RoleDimensionManage)
+	if err != nil {
+		return nil, err
+	}
+
+	dimension, err := c.getDimensionById(ctx, request.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	mapsCreated, mapsDeleted, err := c.Context.GsmService.SyncGameServers(ctx, dimension)
+	if mapsCreated == nil || mapsDeleted == nil {
+		log.Logger.WithContext(ctx).Errorf("failed to sync game servers: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to sync game servers")
+	}
+
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("errors occured syncing game servers: %v", err)
+	}
+
+	if len(mapsCreated) > 0 || len(mapsDeleted) > 0 {
+		log.Logger.WithContext(ctx).Warnf("handled gameserver sync issues, created: %v and deleted: %v", mapsCreated, mapsDeleted)
+	}
+
+	return &pb.GameServerUpdateResponse{
+		MapIdsCreated: mapsCreated,
+		MapIdsDeleted: mapsDeleted,
+	}, nil
 }
 
 // GetDimensions implements pb.DimensionServiceServer.
