@@ -22,7 +22,7 @@ type GameServerContext struct {
 	MapService       service.MapService
 }
 
-func NewDimensionContext(ctx context.Context, cfg *config.DimensionConfig, serviceName string) (*GameServerContext, error) {
+func NewDimensionContext(ctx context.Context, cfg *config.GameServerConfig, serviceName string) (*GameServerContext, error) {
 	dimensionCtx := &GameServerContext{
 		Context:            commonsrv.NewContext(&cfg.BaseConfig, serviceName),
 		DimensionBusWriter: bus.NewKafkaMessageBusWriter(cfg.Kafka, bus.DimensionMessage{}),

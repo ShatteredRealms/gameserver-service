@@ -1,27 +1,29 @@
 package game
 
 import (
-	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
 	"github.com/ShatteredRealms/go-common-service/pkg/model"
 )
 
 const (
-	MinNameLength = 1
-	MaxNameLength = 64
+	MinDimensionNameLength = 1
+	MaxDimensionNameLength = 64
 )
 
 var (
-	// ErrValidation thrown when a validation error occurs
-	ErrValidation = errors.New("validation")
+	DimensionNameRegex = "^[a-zA-Z0-9_- ]+$"
 
-	// ErrNameToShort thrown when a dimension name is too short
-	ErrNameToShort = fmt.Errorf("%w: name must be at least %d characters", ErrValidation, MinNameLength)
+	// ErrDimensionNameToShort thrown when a dimension name is too short
+	ErrDimensionNameToShort = fmt.Errorf("%w: name must be at least %d characters", ErrValidation, MinDimensionNameLength)
+
+	// ErrDimensionNameToLong thrown when a dimension name is too long
+	ErrDimensionNameToLong = fmt.Errorf("%w: name can be at most %d characters", ErrValidation, MaxDimensionNameLength)
 
 	// ErrNameToLong thrown when a dimension name is too long
-	ErrNameToLong = fmt.Errorf("%w: name can be at most %d characters", ErrValidation, MaxNameLength)
+	ErrDimensionRegex = fmt.Errorf("%w: name can be alphanumeric with spaces, dashes and underscores", ErrValidation)
 )
 
 type Dimension struct {
@@ -38,12 +40,20 @@ func (dimension *Dimension) Validate() error {
 }
 
 func (dimension *Dimension) ValidateName() error {
-	if len(dimension.Name) < MinNameLength {
-		return ErrNameToShort
+	if len(dimension.Name) < MinDimensionNameLength {
+		return ErrDimensionNameToShort
 	}
 
-	if len(dimension.Name) > MaxNameLength {
-		return ErrNameToLong
+	if len(dimension.Name) > MaxDimensionNameLength {
+		return ErrDimensionNameToLong
+	}
+
+	ok, err := regexp.MatchString(DimensionNameRegex, dimension.Name)
+	if !ok {
+		return ErrDimensionRegex
+	}
+	if err != nil {
+		return fmt.Errorf("%w: %w", ErrRegex, err)
 	}
 
 	return nil

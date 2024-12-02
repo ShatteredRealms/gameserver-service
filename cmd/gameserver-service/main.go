@@ -23,7 +23,7 @@ func main() {
 	defer stop()
 
 	// Load configuration and setup server context
-	cfg, err := config.NewDimensionConfig(ctx)
+	cfg, err := config.NewGameServerConfig(ctx)
 	if err != nil {
 		log.Logger.WithContext(ctx).Errorf("loading config: %v", err)
 		return
