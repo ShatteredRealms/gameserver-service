@@ -68,6 +68,8 @@ github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/ShatteredRealms/go-common-service v0.8.20 h1:9YNABE/7pABRVPSwkAGIGA50b20q0S0/umZJrlpOkFY=
 github.com/ShatteredRealms/go-common-service v0.8.20/go.mod h1:jhQ9S22lUIz1WNBArCTL1n61yhA3HFr2OuTSimm5hMU=
+github.com/ShatteredRealms/go-common-service v0.8.21 h1:2DSHS4JxwpYl3ZwJdMybJIRMDWm69WtD7YJLRv8TTsk=
+github.com/ShatteredRealms/go-common-service v0.8.21/go.mod h1:jhQ9S22lUIz1WNBArCTL1n61yhA3HFr2OuTSimm5hMU=
 github.com/WilSimpson/gocloak/v13 v13.11.2 h1:PAPQVBxj3rknQKmyaDudGYPAEn/s0fkJUGEm8iSU7xs=
 github.com/WilSimpson/gocloak/v13 v13.11.2/go.mod h1:gL+zCoQEsi6ZCsY8LNMFbOvJ6Fh0etJ9Xt+W4KaAzO8=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
@@ -310,6 +312,7 @@ github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 h1:UH//fgunKIs4JdUbpDl1VZCDa
 github.com/grpc-ecosystem/go-grpc-middleware v1.4.0/go.mod h1:g5qyo/la0ALbONm6Vbp88Yd8NsDy6rZz+RcrMPxvld8=
 github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0 h1:pRhl55Yx1eC7BZ1N+BBWwnKaMyD8uC+34TLdndZMAKk=
 github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0/go.mod h1:XKMd7iuf/RGPSMJ/U4HP0zS2Z9Fh8Ps9a+6X26m/tmI=
+github.com/grpc-ecosystem/grpc-gateway v1.16.0 h1:gmcG1KaJ57LophUzW0Hy8NmPhnMZb4M0+kPpLofRdBo=
 github.com/grpc-ecosystem/grpc-gateway v1.16.0/go.mod h1:BDjrQk3hbvj6Nolgz8mAMFbcEtjT1g+wF4CSlocrBnw=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.24.0 h1:TmHmbvxPmaegwhDubVz0lICL0J5Ka2vwTzhoePEXsGE=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.24.0/go.mod h1:qztMSjm835F2bXf+5HKAPIS5qsmQDqZna/PgVt4rWtI=
