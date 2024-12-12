@@ -54,8 +54,13 @@ func (p *postgresMapRepository) GetMapById(ctx context.Context, mapId *uuid.UUID
 }
 
 // GetMaps implements MapRepository.
-func (p *postgresMapRepository) GetMaps(ctx context.Context) (m *game.Maps, _ error) {
-	return m, p.db(ctx).Find(&m).Error
+func (p *postgresMapRepository) GetMaps(ctx context.Context) (maps *game.Maps, _ error) {
+	return maps, p.db(ctx).Find(&maps).Error
+}
+
+// GetDeletedMaps implements MapRepository.
+func (p *postgresMapRepository) GetDeletedMaps(ctx context.Context) (maps *game.Maps, _ error) {
+	return maps, p.db(ctx).Unscoped().Where("deleted_at > 0").Find(&maps).Error
 }
 
 // UpdateMap implements MapRepository.

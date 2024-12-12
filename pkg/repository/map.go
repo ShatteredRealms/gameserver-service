@@ -9,6 +9,7 @@ import (
 
 type MapRepository interface {
 	GetMaps(ctx context.Context) (*game.Maps, error)
+	GetDeletedMaps(ctx context.Context) (*game.Maps, error)
 
 	GetMapById(ctx context.Context, mapId *uuid.UUID) (*game.Map, error)
 

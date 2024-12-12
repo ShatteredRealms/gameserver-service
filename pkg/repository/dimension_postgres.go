@@ -75,6 +75,11 @@ func (p *postgresDimensionRepository) GetDimensions(ctx context.Context) (dimens
 	return dimensions, p.db(ctx).Find(&dimensions).Error
 }
 
+// GetDeletedDimensions implements DimensionRepository.
+func (p *postgresDimensionRepository) GetDeletedDimensions(ctx context.Context) (dimensions *game.Dimensions, _ error) {
+	return dimensions, p.db(ctx).Unscoped().Where("deleted_at > 0").Find(&dimensions).Error
+}
+
 // UpdateDimension implements DimensionRepository.
 func (p *postgresDimensionRepository) UpdateDimension(ctx context.Context, dimension *game.Dimension) (*game.Dimension, error) {
 	return dimension, p.db(ctx).Save(dimension).Error
@@ -90,4 +95,3 @@ func updateSpanWithDimension(ctx context.Context, dimensionId string) {
 		srospan.DimensionId(dimensionId),
 	)
 }
-

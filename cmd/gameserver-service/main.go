@@ -8,6 +8,10 @@ import (
 	"github.com/ShatteredRealms/gameserver-service/pkg/config"
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
 	"github.com/ShatteredRealms/gameserver-service/pkg/srv"
+	"github.com/ShatteredRealms/go-common-service/pkg/bus"
+	"github.com/ShatteredRealms/go-common-service/pkg/bus/character/characterbus"
+	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/dimensionbus"
+	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/mapbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	commonpb "github.com/ShatteredRealms/go-common-service/pkg/pb"
 	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
@@ -19,8 +23,10 @@ import (
 )
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	interruptCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
+
+	ctx := context.Background()
 
 	// Load configuration and setup server context
 	cfg, err := config.NewGameServerConfig(ctx)
@@ -67,6 +73,25 @@ func main() {
 		return
 	}
 
+	// Bus service
+	busService, err := commonsrv.NewBusServiceServer(
+		ctx,
+		*srvCtx.Context,
+		map[bus.BusMessageType]bus.Resettable{
+			characterbus.Message{}.GetType(): srvCtx.CharacterService.GetResetter(),
+		},
+		map[bus.BusMessageType]commonsrv.WriterResetCallback{
+			dimensionbus.Message{}.GetType(): srvCtx.ResetDimensionBus(),
+			mapbus.Message{}.GetType():       srvCtx.ResetMapBus(),
+		},
+	)
+	commonpb.RegisterBusServiceServer(grpcServer, busService)
+	err = commonpb.RegisterBusServiceHandlerFromEndpoint(ctx, gwmux, cfg.Server.Address(), opts)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("register bus service handler endpoint: %v", err)
+		return
+	}
+
 	// Dimension Service
 	dimensionService, err := srv.NewDimensionServiceServer(ctx, srvCtx)
 	if err != nil {
@@ -96,11 +121,8 @@ func main() {
 	// Setup Complete
 	log.Logger.WithContext(ctx).Info("Initializtion complete")
 	span.End()
-
-	srvErr := make(chan error, 1)
-	go func() {
-		srvErr <- util.StartServer(ctx, grpcServer, gwmux, cfg.Server.Address())
-	}()
+	srv, srvErr := util.StartServer(ctx, grpcServer, gwmux, cfg.Server.Address())
+	defer srv.Shutdown(ctx)
 
 	select {
 	case err := <-srvErr:
@@ -108,7 +130,7 @@ func main() {
 			log.Logger.Error(err)
 		}
 
-	case <-ctx.Done():
+	case <-interruptCtx.Done():
 		log.Logger.Info("Server canceled by user input.")
 		stop()
 	}

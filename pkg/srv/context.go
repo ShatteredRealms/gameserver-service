@@ -75,3 +75,65 @@ func NewGameServerContext(ctx context.Context, cfg *config.GameServerConfig, ser
 func (gsCtx *GameServerContext) UsingAgones() bool {
 	return gsCtx.Config.Mode != commoncfg.ModeLocal
 }
+
+func (c *GameServerContext) ResetDimensionBus() commonsrv.WriterResetCallback {
+	return func(ctx context.Context) error {
+		ctx, span := c.Context.Tracer.Start(ctx, "dimension.reset_dimension_bus")
+		defer span.End()
+		dimensions, err := c.DimensionService.GetDimensions(ctx)
+		if err != nil {
+			return fmt.Errorf("get dimensions: %w", err)
+		}
+		deletedDimensions, err := c.DimensionService.GetDeletedDimensions(ctx)
+		if err != nil {
+			return fmt.Errorf("get deleted dimensions: %w", err)
+		}
+
+		msgs := make([]dimensionbus.Message, len(*dimensions)+len(*deletedDimensions))
+		for idx, char := range *dimensions {
+			msgs[idx] = dimensionbus.Message{
+				Id:      char.Id.String(),
+				Deleted: false,
+			}
+		}
+		for idx, char := range *deletedDimensions {
+			msgs[idx+len(*dimensions)] = dimensionbus.Message{
+				Id:      char.Id.String(),
+				Deleted: true,
+			}
+		}
+
+		return c.DimensionBusWriter.PublishMany(ctx, msgs)
+	}
+}
+
+func (c *GameServerContext) ResetMapBus() commonsrv.WriterResetCallback {
+	return func(ctx context.Context) error {
+		ctx, span := c.Context.Tracer.Start(ctx, "map.reset_map_bus")
+		defer span.End()
+		maps, err := c.MapService.GetMaps(ctx)
+		if err != nil {
+			return fmt.Errorf("get maps: %w", err)
+		}
+		deletedMaps, err := c.MapService.GetDeletedMaps(ctx)
+		if err != nil {
+			return fmt.Errorf("get deleted maps: %w", err)
+		}
+
+		msgs := make([]mapbus.Message, len(*maps)+len(*deletedMaps))
+		for idx, char := range *maps {
+			msgs[idx] = mapbus.Message{
+				Id:      char.Id.String(),
+				Deleted: false,
+			}
+		}
+		for idx, char := range *deletedMaps {
+			msgs[idx+len(*maps)] = mapbus.Message{
+				Id:      char.Id.String(),
+				Deleted: true,
+			}
+		}
+
+		return c.MapBusWriter.PublishMany(ctx, msgs)
+	}
+}

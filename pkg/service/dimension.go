@@ -11,6 +11,7 @@ import (
 
 type DimensionService interface {
 	GetDimensions(ctx context.Context) (*game.Dimensions, error)
+	GetDeletedDimensions(ctx context.Context) (*game.Dimensions, error)
 	GetDimensionById(ctx context.Context, dimensionId *uuid.UUID) (*game.Dimension, error)
 	CreateDimension(ctx context.Context, name, version, location string, mapIds []*uuid.UUID) (*game.Dimension, error)
 	DeleteDimension(ctx context.Context, dimensionId *uuid.UUID) (*game.Dimension, error)
@@ -74,4 +75,9 @@ func (d *dimensionService) GetDimensionById(ctx context.Context, dimensionId *uu
 // GetDimensions implements DimesionService.
 func (d *dimensionService) GetDimensions(ctx context.Context) (*game.Dimensions, error) {
 	return d.repo.GetDimensions(ctx)
+}
+
+// GetDimensions implements DimesionService.
+func (d *dimensionService) GetDeletedDimensions(ctx context.Context) (*game.Dimensions, error) {
+	return d.repo.GetDeletedDimensions(ctx)
 }
