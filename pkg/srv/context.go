@@ -92,13 +92,13 @@ func (c *GameServerContext) ResetDimensionBus() commonsrv.WriterResetCallback {
 		msgs := make([]dimensionbus.Message, len(*dimensions)+len(*deletedDimensions))
 		for idx, char := range *dimensions {
 			msgs[idx] = dimensionbus.Message{
-				Id:      char.Id.String(),
+				Id:      *char.Id,
 				Deleted: false,
 			}
 		}
 		for idx, char := range *deletedDimensions {
 			msgs[idx+len(*dimensions)] = dimensionbus.Message{
-				Id:      char.Id.String(),
+				Id:      *char.Id,
 				Deleted: true,
 			}
 		}
@@ -123,13 +123,13 @@ func (c *GameServerContext) ResetMapBus() commonsrv.WriterResetCallback {
 		msgs := make([]mapbus.Message, len(*maps)+len(*deletedMaps))
 		for idx, char := range *maps {
 			msgs[idx] = mapbus.Message{
-				Id:      char.Id.String(),
+				Id:      *char.Id,
 				Deleted: false,
 			}
 		}
 		for idx, char := range *deletedMaps {
 			msgs[idx+len(*maps)] = mapbus.Message{
-				Id:      char.Id.String(),
+				Id:      *char.Id,
 				Deleted: true,
 			}
 		}

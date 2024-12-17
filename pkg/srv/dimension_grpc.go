@@ -84,7 +84,7 @@ func (c *dimensionServiceServer) CreateDimension(ctx context.Context, request *p
 	}
 
 	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
-		Id:      dimension.Id.String(),
+		Id:      *dimension.Id,
 		Deleted: false,
 	})
 
@@ -119,7 +119,7 @@ func (c *dimensionServiceServer) DeleteDimension(ctx context.Context, request *c
 	}
 
 	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
-		Id:      dimension.Id.String(),
+		Id:      *dimension.Id,
 		Deleted: true,
 	})
 
@@ -163,7 +163,7 @@ func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request
 	}
 
 	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
-		Id:      newDimension.Id.String(),
+		Id:      *newDimension.Id,
 		Deleted: false,
 	})
 
