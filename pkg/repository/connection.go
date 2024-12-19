@@ -10,7 +10,7 @@ import (
 type ConnectionRepository interface {
 	CreatePendingConnection(
 		ctx context.Context,
-		character string,
+		characterId *uuid.UUID,
 		serverName string,
 	) (*gameserver.PendingConnection, error)
 	DeletePendingConnection(ctx context.Context, id *uuid.UUID) error

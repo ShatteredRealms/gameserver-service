@@ -8,6 +8,7 @@ import (
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/gameserver"
 	"github.com/ShatteredRealms/gameserver-service/pkg/repository"
+	"github.com/ShatteredRealms/go-common-service/pkg/common"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	"github.com/google/uuid"
 )
@@ -20,7 +21,7 @@ var (
 type ConnectionService interface {
 	CreatePendingConnection(
 		ctx context.Context,
-		character string,
+		characterId string,
 		serverName string,
 	) (*gameserver.PendingConnection, error)
 	CheckPlayerConnection(
@@ -71,8 +72,12 @@ func (c *connectionService) CheckPlayerConnection(
 // CreatePendingConnection implements ConnectionService.
 func (c *connectionService) CreatePendingConnection(
 	ctx context.Context,
-	character string,
+	characterId string,
 	serverName string,
 ) (*gameserver.PendingConnection, error) {
-	return c.repo.CreatePendingConnection(ctx, character, serverName)
+	id, err := uuid.Parse(characterId)
+	if err != nil {
+		return nil, common.ErrInvalidId
+	}
+	return c.repo.CreatePendingConnection(ctx, &id, serverName)
 }

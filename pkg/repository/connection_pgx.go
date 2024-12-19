@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/gameserver"
+	"github.com/ShatteredRealms/go-common-service/pkg/common"
 	"github.com/ShatteredRealms/go-common-service/pkg/repository"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -21,7 +22,14 @@ func NewPgxConnectionRepository(migrater *repository.PgxMigrater) ConnectionRepo
 }
 
 // CreatePendingConnection implements ConnectionRepository.
-func (p *pgxConnectionRepository) CreatePendingConnection(ctx context.Context, character string, serverName string) (*gameserver.PendingConnection, error) {
+func (p *pgxConnectionRepository) CreatePendingConnection(
+	ctx context.Context,
+	characterId *uuid.UUID,
+	serverName string,
+) (*gameserver.PendingConnection, error) {
+	if characterId == nil {
+		return nil, common.ErrInvalidId
+	}
 	tx, err := p.conn.Begin(ctx)
 	defer tx.Rollback(ctx)
 	if err != nil {
@@ -29,8 +37,8 @@ func (p *pgxConnectionRepository) CreatePendingConnection(ctx context.Context, c
 	}
 
 	rows, err := tx.Query(ctx,
-		"INSERT INTO pending_connections (character, server_name) VALUES ($1, $2) RETURNING *",
-		character, serverName)
+		"INSERT INTO pending_connections (character_id, server_name) VALUES ($1, $2) RETURNING *",
+		characterId, serverName)
 	if err != nil {
 		return nil, err
 	}
@@ -40,12 +48,7 @@ func (p *pgxConnectionRepository) CreatePendingConnection(ctx context.Context, c
 		return nil, err
 	}
 
-	err = tx.Commit(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &outConn, nil
+	return &outConn, tx.Commit(ctx)
 }
 
 // DeletePendingConnection implements ConnectionRepository.

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/ShatteredRealms/go-common-service/pkg/repository"
@@ -22,6 +24,10 @@ func NewPgxMapRepository(migrater *repository.PgxMigrater) MapRepository {
 
 // CreateMap implements MapRepository.
 func (p *PgxMapRepository) CreateMap(ctx context.Context, m *game.Map) (*game.Map, error) {
+	if m == nil {
+		return nil, errors.New("map is nil")
+	}
+
 	tx, err := p.conn.Begin(ctx)
 	defer tx.Rollback(ctx)
 	if err != nil {
@@ -52,7 +58,14 @@ func (p *PgxMapRepository) DeleteMap(ctx context.Context, mapId *uuid.UUID) (*ga
 		mapId)
 	outMap, err := pgx.CollectExactlyOneRow(rows, pgx.RowToAddrOfStructByName[game.Map])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("setting map as deleted: %w", err)
+	}
+
+	_, err = tx.Exec(ctx,
+		"DELETE FROM dimension_maps WHERE map_id = $1",
+		mapId)
+	if err != nil {
+		return nil, fmt.Errorf("deleting dimension maps: %w", err)
 	}
 
 	return outMap, tx.Commit(ctx)
@@ -104,7 +117,7 @@ func (p *PgxMapRepository) GetMaps(ctx context.Context) (game.Maps, error) {
 	}
 
 	rows, _ := tx.Query(ctx,
-		"SELECT * FROM maps")
+		"SELECT * FROM maps WHERE deleted_at IS NULL")
 	outMaps, err := pgx.CollectRows(rows, pgx.RowToAddrOfStructByName[game.Map])
 	if err != nil {
 		return nil, err
@@ -115,6 +128,10 @@ func (p *PgxMapRepository) GetMaps(ctx context.Context) (game.Maps, error) {
 
 // UpdateMap implements MapRepository.
 func (p *PgxMapRepository) UpdateMap(ctx context.Context, m *game.Map) (*game.Map, error) {
+	if m == nil {
+		return nil, errors.New("map is nil")
+	}
+
 	tx, err := p.conn.Begin(ctx)
 	defer tx.Rollback(ctx)
 	if err != nil {
