@@ -29,12 +29,11 @@ var (
 
 type Map struct {
 	Id        uuid.UUID  `db:"id" json:"id"`
+	Name      string     `db:"name" json:"name"`
+	MapPath   string     `db:"map_path" json:"map_path"`
 	CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 	UpdatedAt time.Time  `db:"updated_at" json:"updatedAt"`
 	DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
-
-	Name    string `db:"name" json:"name"`
-	MapPath string `db:"map_path" json:"map_path"`
 }
 
 type Maps []*Map

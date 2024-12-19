@@ -8,10 +8,10 @@ import (
 
 type PendingConnection struct {
 	// Id secret used by a server to lookup a pending connection
-	Id *uuid.UUID `db:"id" json:"id"`
+	Id uuid.UUID `db:"id" json:"id"`
 
 	// Character id of the character attempting to connect
-	CharacterId string `db:"character_id" json:"characterId"`
+	CharacterId uuid.UUID `db:"character_id" json:"characterId"`
 
 	// ServerName the name of the server the character is assigned to
 	ServerName string `db:"server_name" json:"serverName"`

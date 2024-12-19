@@ -29,15 +29,14 @@ var (
 
 type Dimension struct {
 	Id        uuid.UUID  `db:"id" json:"id"`
+	Name      string     `db:"name" json:"name"`
+	Version   string     `db:"version" json:"version"`
+	Location  string     `db:"location" json:"location"`
 	CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 	UpdatedAt time.Time  `db:"updated_at" json:"updatedAt"`
 	DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
 
-	Name     string `db:"name" json:"name"`
-	Location string `db:"location" json:"location"`
-	Version  string `db:"version" json:"version"`
-
-	Maps Maps `json:"maps"`
+	Maps Maps `db:"maps" json:"maps"`
 }
 type Dimensions []*Dimension
 
