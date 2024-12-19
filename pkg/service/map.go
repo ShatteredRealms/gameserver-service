@@ -9,8 +9,8 @@ import (
 )
 
 type MapService interface {
-	GetMaps(ctx context.Context) (*game.Maps, error)
-	GetDeletedMaps(ctx context.Context) (*game.Maps, error)
+	GetMaps(ctx context.Context) (game.Maps, error)
+	GetDeletedMaps(ctx context.Context) (game.Maps, error)
 	GetMapById(ctx context.Context, mapId *uuid.UUID) (*game.Map, error)
 	CreateMap(ctx context.Context, name, mapPath string) (*game.Map, error)
 	DeleteMap(ctx context.Context, mapId *uuid.UUID) (*game.Map, error)
@@ -47,12 +47,12 @@ func (s *mapService) GetMapById(ctx context.Context, mapId *uuid.UUID) (*game.Ma
 }
 
 // GetMaps implements MapService.
-func (s *mapService) GetMaps(ctx context.Context) (*game.Maps, error) {
+func (s *mapService) GetMaps(ctx context.Context) (game.Maps, error) {
 	return s.repo.GetMaps(ctx)
 }
 
 // GetDeletedMaps implements MapService.
-func (s *mapService) GetDeletedMaps(ctx context.Context) (*game.Maps, error) {
+func (s *mapService) GetDeletedMaps(ctx context.Context) (game.Maps, error) {
 	return s.repo.GetDeletedMaps(ctx)
 }
 

@@ -3,9 +3,10 @@ package game
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
-	"github.com/ShatteredRealms/go-common-service/pkg/model"
+	"github.com/google/uuid"
 )
 
 const (
@@ -27,11 +28,16 @@ var (
 )
 
 type Dimension struct {
-	model.Model
-	Name     string `gorm:"index:idx_deleted,unique;not null" json:"name"`
-	Version  string `gorm:"not null" json:"version"`
-	Maps     Maps   `gorm:"many2many:dimension_maps" json:"maps"`
-	Location string `gorm:"not null" json:"location"`
+	Id        uuid.UUID  `db:"id" json:"id"`
+	CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time  `db:"updated_at" json:"updatedAt"`
+	DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
+
+	Name     string `db:"name" json:"name"`
+	Location string `db:"location" json:"location"`
+	Version  string `db:"version" json:"version"`
+
+	Maps Maps `json:"maps"`
 }
 type Dimensions []*Dimension
 
@@ -61,8 +67,8 @@ func (dimension *Dimension) ValidateName() error {
 
 func (dimension *Dimension) ToPb() *pb.Dimension {
 	maps := make([]string, len(dimension.Maps))
-	for _, m := range dimension.Maps {
-		maps = append(maps, m.Id.String())
+	for idx, m := range dimension.Maps {
+		maps[idx] = m.Id.String()
 	}
 
 	return &pb.Dimension{

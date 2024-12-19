@@ -5,15 +5,14 @@ import (
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/ShatteredRealms/gameserver-service/pkg/repository"
-	"github.com/ShatteredRealms/go-common-service/pkg/model"
 	"github.com/google/uuid"
 )
 
 type DimensionService interface {
-	GetDimensions(ctx context.Context) (*game.Dimensions, error)
-	GetDeletedDimensions(ctx context.Context) (*game.Dimensions, error)
+	GetDimensions(ctx context.Context) (game.Dimensions, error)
+	GetDeletedDimensions(ctx context.Context) (game.Dimensions, error)
 	GetDimensionById(ctx context.Context, dimensionId *uuid.UUID) (*game.Dimension, error)
-	CreateDimension(ctx context.Context, name, version, location string, mapIds []*uuid.UUID) (*game.Dimension, error)
+	CreateDimension(ctx context.Context, name, version, location string, mapIds []uuid.UUID) (*game.Dimension, error)
 	DeleteDimension(ctx context.Context, dimensionId *uuid.UUID) (*game.Dimension, error)
 	EditDimension(ctx context.Context, dimension *game.Dimension) (*game.Dimension, error)
 }
@@ -27,13 +26,11 @@ func NewDimensionService(repo repository.DimensionRepository) DimensionService {
 }
 
 // CreateDimension implements DimesionService.
-func (d *dimensionService) CreateDimension(ctx context.Context, name, version, location string, mapIds []*uuid.UUID) (*game.Dimension, error) {
+func (d *dimensionService) CreateDimension(ctx context.Context, name, version, location string, mapIds []uuid.UUID) (*game.Dimension, error) {
 	maps := make([]*game.Map, len(mapIds))
 	for idx, mapId := range mapIds {
 		maps[idx] = &game.Map{
-			Model: model.Model{
-				Id: mapId,
-			},
+			Id: mapId,
 		}
 	}
 
@@ -73,11 +70,11 @@ func (d *dimensionService) GetDimensionById(ctx context.Context, dimensionId *uu
 }
 
 // GetDimensions implements DimesionService.
-func (d *dimensionService) GetDimensions(ctx context.Context) (*game.Dimensions, error) {
+func (d *dimensionService) GetDimensions(ctx context.Context) (game.Dimensions, error) {
 	return d.repo.GetDimensions(ctx)
 }
 
 // GetDimensions implements DimesionService.
-func (d *dimensionService) GetDeletedDimensions(ctx context.Context) (*game.Dimensions, error) {
+func (d *dimensionService) GetDeletedDimensions(ctx context.Context) (game.Dimensions, error) {
 	return d.repo.GetDeletedDimensions(ctx)
 }

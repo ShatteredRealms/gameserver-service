@@ -39,19 +39,24 @@ func NewGameServerContext(ctx context.Context, cfg *config.GameServerConfig, ser
 	ctx, span := gsCtx.Tracer.Start(ctx, "context.dimension.new")
 	defer span.End()
 
-	pg, err := commonrepo.ConnectDB(ctx, cfg.Postgres, cfg.Redis)
+	pg, err := commonrepo.ConnectDB(ctx, commoncfg.DBPoolConfig{Master: cfg.Postgres}, cfg.Redis)
 	if err != nil {
 		return nil, fmt.Errorf("connect db: %w", err)
 	}
 
+	migrater, err := commonrepo.NewPgxMigrater(ctx, cfg.Postgres.PostgresDSN(), "migrations")
+	if err != nil {
+		return nil, fmt.Errorf("new migrater: %w", err)
+	}
+
 	gsCtx.DimensionService = service.NewDimensionService(
-		repository.NewPostgresDimensionRepository(pg),
+		repository.NewPgxDimensionRepository(migrater),
 	)
 	gsCtx.MapService = service.NewMapService(
-		repository.NewPostgresMapRepository(pg),
+		repository.NewPgxMapRepository(migrater),
 	)
 	gsCtx.ConnectionService = service.NewConnectionService(
-		repository.NewPostgresConnectionRepository(pg),
+		repository.NewPgxConnectionRepository(migrater),
 	)
 	gsCtx.CharacterService = characterbus.NewService(
 		characterbus.NewPostgresRepository(pg),
@@ -89,16 +94,16 @@ func (c *GameServerContext) ResetDimensionBus() commonsrv.WriterResetCallback {
 			return fmt.Errorf("get deleted dimensions: %w", err)
 		}
 
-		msgs := make([]dimensionbus.Message, len(*dimensions)+len(*deletedDimensions))
-		for idx, char := range *dimensions {
+		msgs := make([]dimensionbus.Message, len(dimensions)+len(deletedDimensions))
+		for idx, char := range dimensions {
 			msgs[idx] = dimensionbus.Message{
-				Id:      *char.Id,
+				Id:      char.Id,
 				Deleted: false,
 			}
 		}
-		for idx, char := range *deletedDimensions {
-			msgs[idx+len(*dimensions)] = dimensionbus.Message{
-				Id:      *char.Id,
+		for idx, char := range deletedDimensions {
+			msgs[idx+len(dimensions)] = dimensionbus.Message{
+				Id:      char.Id,
 				Deleted: true,
 			}
 		}
@@ -120,16 +125,16 @@ func (c *GameServerContext) ResetMapBus() commonsrv.WriterResetCallback {
 			return fmt.Errorf("get deleted maps: %w", err)
 		}
 
-		msgs := make([]mapbus.Message, len(*maps)+len(*deletedMaps))
-		for idx, char := range *maps {
+		msgs := make([]mapbus.Message, len(maps)+len(deletedMaps))
+		for idx, char := range maps {
 			msgs[idx] = mapbus.Message{
-				Id:      *char.Id,
+				Id:      char.Id,
 				Deleted: false,
 			}
 		}
-		for idx, char := range *deletedMaps {
-			msgs[idx+len(*maps)] = mapbus.Message{
-				Id:      *char.Id,
+		for idx, char := range deletedMaps {
+			msgs[idx+len(maps)] = mapbus.Message{
+				Id:      char.Id,
 				Deleted: true,
 			}
 		}

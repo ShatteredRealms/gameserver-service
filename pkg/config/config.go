@@ -32,7 +32,7 @@ var (
 
 type GameServerConfig struct {
 	cconfig.BaseConfig `yaml:",inline" dimensionstructure:",squash"`
-	Postgres           cconfig.DBPoolConfig    `yaml:"postgres"`
+	Postgres           cconfig.DBConfig        `yaml:"postgres"`
 	Redis              cconfig.DBPoolConfig    `yaml:"redis"`
 	GsmConfig          GameServerManagerConfig `yaml:"gameServerManager"`
 }
@@ -68,16 +68,14 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 				},
 			},
 		},
-		Postgres: cconfig.DBPoolConfig{
-			Master: cconfig.DBConfig{
-				ServerAddress: cconfig.ServerAddress{
-					Host: "localhost",
-					Port: "5432",
-				},
-				Name:     "gameserver_service",
-				Username: "postgres",
-				Password: "password",
+		Postgres: cconfig.DBConfig{
+			ServerAddress: cconfig.ServerAddress{
+				Host: "localhost",
+				Port: "5432",
 			},
+			Name:     "gameserver_service",
+			Username: "postgres",
+			Password: "password",
 		},
 		Redis: cconfig.DBPoolConfig{
 			Master: cconfig.DBConfig{

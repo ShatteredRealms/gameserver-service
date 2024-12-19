@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS dimension_maps;
+DROP TABLE IF EXISTS dimensions;
+DROP TABLE IF EXISTS maps;

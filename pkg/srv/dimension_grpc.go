@@ -56,13 +56,13 @@ func (c *dimensionServiceServer) CreateDimension(ctx context.Context, request *p
 		return nil, err
 	}
 
-	mapIds := make([]*uuid.UUID, len(request.MapIds))
+	mapIds := make([]uuid.UUID, len(request.MapIds))
 	for idx, mapId := range request.MapIds {
 		id, err := uuid.Parse(mapId)
 		if err != nil {
 			return nil, status.Error(codes.InvalidArgument, ErrMapId.Error())
 		}
-		mapIds[idx] = &id
+		mapIds[idx] = id
 
 		m, err := c.Context.MapService.GetMapById(ctx, &id)
 		if err != nil {
@@ -80,11 +80,12 @@ func (c *dimensionServiceServer) CreateDimension(ctx context.Context, request *p
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
+		log.Logger.WithContext(ctx).Errorf("%v: %v", ErrDimensionCreate, err)
 		return nil, status.Error(codes.Internal, ErrDimensionCreate.Error())
 	}
 
 	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
-		Id:      *dimension.Id,
+		Id:      dimension.Id,
 		Deleted: false,
 	})
 
@@ -119,7 +120,7 @@ func (c *dimensionServiceServer) DeleteDimension(ctx context.Context, request *c
 	}
 
 	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
-		Id:      *dimension.Id,
+		Id:      dimension.Id,
 		Deleted: true,
 	})
 
@@ -144,10 +145,9 @@ func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request
 		return nil, err
 	}
 
-	dimension.Id = nil
 	dimension.Name = request.Name
 
-	mapIds := make([]*uuid.UUID, len(dimension.Maps))
+	mapIds := make([]uuid.UUID, len(dimension.Maps))
 	for idx, m := range dimension.Maps {
 		mapIds[idx] = m.Id
 	}
@@ -163,7 +163,7 @@ func (c *dimensionServiceServer) DuplicateDimension(ctx context.Context, request
 	}
 
 	c.Context.DimensionBusWriter.Publish(ctx, dimensionbus.Message{
-		Id:      *newDimension.Id,
+		Id:      newDimension.Id,
 		Deleted: false,
 	})
 

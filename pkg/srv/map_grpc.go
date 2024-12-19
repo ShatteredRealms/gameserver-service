@@ -53,11 +53,12 @@ func (s *mapServiceServer) CreateMap(ctx context.Context, request *pb.CreateMapR
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
+		log.Logger.WithContext(ctx).Errorf("%v: %v", ErrMapCreate, err)
 		return nil, status.Error(codes.Internal, ErrMapCreate.Error())
 	}
 
 	s.Context.MapBusWriter.Publish(ctx, mapbus.Message{
-		Id:      *m.Id,
+		Id:      m.Id,
 		Deleted: false,
 	})
 
@@ -86,7 +87,7 @@ func (s *mapServiceServer) DeleteMap(ctx context.Context, request *commonpb.Targ
 	}
 
 	s.Context.MapBusWriter.Publish(ctx, mapbus.Message{
-		Id:      *m.Id,
+		Id:      m.Id,
 		Deleted: true,
 	})
 

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
-	"github.com/ShatteredRealms/go-common-service/pkg/model"
 	"github.com/google/uuid"
 )
 
@@ -29,11 +28,13 @@ var (
 )
 
 type Map struct {
-	model.Model
-	Name      string `gorm:"not null" json:"name"`
-	MapPath   string `gorm:"not null" json:"map_path"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Id        uuid.UUID  `db:"id" json:"id"`
+	CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt time.Time  `db:"updated_at" json:"updatedAt"`
+	DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
+
+	Name    string `db:"name" json:"name"`
+	MapPath string `db:"map_path" json:"map_path"`
 }
 
 type Maps []*Map
@@ -62,8 +63,8 @@ func (m *Map) ValidateName() error {
 	return nil
 }
 
-func (m *Maps) HasMap(id *uuid.UUID) (int, bool) {
-	for idx, mapItem := range *m {
+func (m Maps) HasMap(id uuid.UUID) (int, bool) {
+	for idx, mapItem := range m {
 		if mapItem.Id == id {
 			return idx, true
 		}

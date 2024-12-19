@@ -8,8 +8,8 @@ import (
 )
 
 type DimensionRepository interface {
-	GetDimensions(ctx context.Context) (*game.Dimensions, error)
-	GetDeletedDimensions(ctx context.Context) (*game.Dimensions, error)
+	GetDimensions(ctx context.Context) (game.Dimensions, error)
+	GetDeletedDimensions(ctx context.Context) (game.Dimensions, error)
 
 	GetDimensionById(ctx context.Context, dimensionId *uuid.UUID) (*game.Dimension, error)
 
