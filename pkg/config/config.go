@@ -31,7 +31,7 @@ var (
 )
 
 type GameServerConfig struct {
-	cconfig.BaseConfig `yaml:",inline" dimensionstructure:",squash"`
+	cconfig.BaseConfig `yaml:",inline" mapstructure:",squash"`
 	Postgres           cconfig.DBConfig        `yaml:"postgres"`
 	Redis              cconfig.DBPoolConfig    `yaml:"redis"`
 	GsmConfig          GameServerManagerConfig `yaml:"gameServerManager"`
