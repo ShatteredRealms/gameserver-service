@@ -3,8 +3,8 @@ module github.com/ShatteredRealms/gameserver-service
 go 1.23.3
 
 require (
-	github.com/ShatteredRealms/go-common-service v0.9.8
-	github.com/WilSimpson/gocloak/v13 v13.11.2
+	github.com/ShatteredRealms/go-common-service v0.9.16
+	github.com/WilSimpson/gocloak/v13 v13.11.3
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.25.1
@@ -14,10 +14,10 @@ require (
 	github.com/solo-io/protoc-gen-openapi v0.2.5
 	github.com/spf13/cobra-cli v1.3.0
 	go.uber.org/mock v0.5.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20241219192143-6b3ec007d9bb
+	google.golang.org/genproto/googleapis/api v0.0.0-20241223144023-3abc09e42ca8
 	google.golang.org/grpc v1.69.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
-	google.golang.org/protobuf v1.36.0
+	google.golang.org/protobuf v1.36.1
 	k8s.io/api v0.31.2
 	k8s.io/apimachinery v0.32.0
 	k8s.io/client-go v0.31.0
@@ -72,9 +72,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.71.1 // indirect
 	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cloudflare/golz4 v0.0.0-20240916140612-caecf3c00c06 // indirect
-	github.com/cncf/xds/go v0.0.0-20241213214725-57cfbe6fad57 // indirect
+	github.com/cncf/xds/go v0.0.0-20241223141626-cff3c89139a3 // indirect
 	github.com/cockroachdb/cockroach-go/v2 v2.3.8 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
@@ -86,7 +85,8 @@ require (
 	github.com/dvsekhvalnov/jose2go v1.8.0 // indirect
 	github.com/edsrzf/mmap-go v1.2.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
-	github.com/envoyproxy/go-control-plane v0.13.1 // indirect
+	github.com/envoyproxy/go-control-plane v0.13.2 // indirect
+	github.com/envoyproxy/go-control-plane/envoy v1.32.2 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/exaring/otelpgx v0.7.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
@@ -106,7 +106,7 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/flatbuffers v24.3.25+incompatible // indirect
+	github.com/google/flatbuffers v24.12.23+incompatible // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-github/v39 v39.2.0 // indirect
@@ -188,8 +188,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/api v0.214.0 // indirect
-	google.golang.org/genproto v0.0.0-20241219192143-6b3ec007d9bb // indirect
-	google.golang.org/grpc/stats/opentelemetry v0.0.0-20241028142157-ada6787961b3 // indirect
+	google.golang.org/genproto v0.0.0-20241223144023-3abc09e42ca8 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -200,10 +199,10 @@ require (
 	modernc.org/db v1.0.10 // indirect
 	modernc.org/file v1.0.8 // indirect
 	modernc.org/fileutil v1.3.0 // indirect
-	modernc.org/gc/v3 v3.0.0-20241213165251-3bc300f6d0c9 // indirect
+	modernc.org/gc/v3 v3.0.0-20241223112719-96e2e1e4408d // indirect
 	modernc.org/golex v1.1.0 // indirect
 	modernc.org/internal v1.1.0 // indirect
-	modernc.org/libc v1.61.4 // indirect
+	modernc.org/libc v1.61.5 // indirect
 	modernc.org/lldb v1.0.8 // indirect
 	modernc.org/mathutil v1.7.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
@@ -303,7 +302,7 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241219192143-6b3ec007d9bb // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.5.10 // indirect
