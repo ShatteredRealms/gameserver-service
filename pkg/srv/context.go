@@ -66,7 +66,7 @@ func NewGameServerContext(ctx context.Context, cfg *config.GameServerConfig, ser
 
 	if gsCtx.UsingAgones() {
 		gsCtx.GsmService, err = service.NewGameServerManagerService(
-			cfg.GsmConfig,
+			&cfg.Gsm,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("new gsm service: %w", err)

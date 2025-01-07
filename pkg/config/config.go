@@ -34,7 +34,7 @@ type GameServerConfig struct {
 	cconfig.BaseConfig `yaml:",inline" mapstructure:",squash"`
 	Postgres           cconfig.DBConfig        `yaml:"postgres"`
 	Redis              cconfig.DBPoolConfig    `yaml:"redis"`
-	GsmConfig          GameServerManagerConfig `yaml:"gameServerManager"`
+	Gsm                GameServerManagerConfig `yaml:"gameServerManager"`
 }
 
 type GameServerManagerConfig struct {
@@ -42,6 +42,7 @@ type GameServerManagerConfig struct {
 	FleetPrefix           string `yaml:"fleetPrefix"`
 	FleetAutoscalerPrefix string `yaml:"fleetAutoscalerPrefix"`
 	GameServerNamespace   string `yaml:"gameServerNamespace"`
+	KubeConfigPath        string `yaml:"kubeConfigPath"`
 }
 
 func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
@@ -85,15 +86,20 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 				},
 			},
 		},
-		GsmConfig: GameServerManagerConfig{
-			GameServerImage:       "sro-gameserver",
+		Gsm: GameServerManagerConfig{
+			GameServerImage:       "us-docker.pkg.dev/agones-images/examples/simple-game-server",
 			FleetPrefix:           "sro-f",
 			FleetAutoscalerPrefix: "sro-fas",
+			GameServerNamespace:   "sro-gs",
 		},
 	}
 
 	err := cconfig.BindConfigEnvs(ctx, "sro-gameserver-service", config)
 	return config, err
+}
+
+func (c *GameServerManagerConfig) GetFullGameServerImage(dimension *game.Dimension) string {
+	return fmt.Sprintf("%s:%s", c.GameServerImage, dimension.Version)
 }
 
 func (c *GameServerManagerConfig) GetFleetTemplate(dimension *game.Dimension, m *game.Map) *v1.Fleet {
@@ -147,7 +153,7 @@ func (c *GameServerManagerConfig) GetFleetTemplate(dimension *game.Dimension, m 
 							Containers: []corev1.Container{
 								{
 									Name:  "gameserver",
-									Image: c.GameServerImage,
+									Image: c.GetFullGameServerImage(dimension),
 									Args: []string{
 										m.MapPath,
 										"-log",

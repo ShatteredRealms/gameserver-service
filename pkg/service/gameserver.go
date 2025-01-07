@@ -12,7 +12,7 @@ import (
 	"github.com/ShatteredRealms/gameserver-service/pkg/config"
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
-	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -238,7 +238,7 @@ func (g *gsmService) Start(ctx context.Context) {
 					}()
 				} else {
 					go func() {
-						err := g.createGameServers(g.ctx, data.Dimension, data.Map)
+						err := g.deleteGameServers(g.ctx, data.Dimension, data.Map)
 						if err != nil {
 							log.Logger.WithContext(ctx).Errorf("error deleting dimension '%s' map '%s': %v", data.Dimension.Id, data.Map.Id, err)
 						}
@@ -298,21 +298,23 @@ func (g *gsmService) deleteGameServers(ctx context.Context, dimension *game.Dime
 }
 
 func NewGameServerManagerService(
-	gameServerConfig config.GameServerManagerConfig,
+	gameServerConfig *config.GameServerManagerConfig,
 ) (GameServerManagerService, error) {
-	g := &gsmService{}
-
-	config, err := rest.InClusterConfig()
+	// If the kube config path is empty, then the in-cluster config will be used.
+	config, err := clientcmd.BuildConfigFromFlags("", gameServerConfig.KubeConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("get kubernetes config: %w", err)
+	}
+
+	g := &gsmService{
+		config:               gameServerConfig,
+		DimensionMapsChanged: make(chan dimensionMap, 30),
 	}
 
 	g.agones, err = versioned.NewForConfig(config)
 	if err != nil {
 		return nil, fmt.Errorf("create agones client: %w", err)
 	}
-
-	g.DimensionMapsChanged = make(chan dimensionMap, 30)
 
 	return g, nil
 }
