@@ -121,5 +121,5 @@ func (c *connectionServiceServer) VerifyConnect(
 }
 
 func NewConnectionServiceServer(ctx context.Context, srvCtx *GameServerContext) (pb.ConnectionServiceServer, error) {
-	return &connectionServiceServer{Context: srvCtx}, srvCtx.CreateRoles(ctx, &DimensionRoles)
+	return &connectionServiceServer{Context: srvCtx}, srvCtx.CreateRoles(ctx, &ConnectionRoles)
 }
