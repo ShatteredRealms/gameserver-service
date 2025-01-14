@@ -122,6 +122,19 @@ func main() {
 		return
 	}
 
+	// Connection Service
+	connectionService, err := srv.NewConnectionServiceServer(ctx, srvCtx)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("creating connection service: %v", err)
+		return
+	}
+	pb.RegisterConnectionServiceServer(grpcServer, connectionService)
+	err = pb.RegisterConnectionServiceHandlerFromEndpoint(ctx, gwmux, cfg.Server.Address(), opts)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("register connection service handler endpoint: %v", err)
+		return
+	}
+
 	// Setup Complete
 	log.Logger.WithContext(ctx).Info("Initializtion complete")
 	span.End()

@@ -120,6 +120,6 @@ func (c *connectionServiceServer) VerifyConnect(
 	panic("unimplemented")
 }
 
-func NewConnectionServiceServer(ctx *GameServerContext) pb.ConnectionServiceServer {
-	return &connectionServiceServer{Context: ctx}
+func NewConnectionServiceServer(ctx context.Context, srvCtx *GameServerContext) (pb.ConnectionServiceServer, error) {
+	return &connectionServiceServer{Context: srvCtx}, srvCtx.CreateRoles(ctx, &DimensionRoles)
 }
