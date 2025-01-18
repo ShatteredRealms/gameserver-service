@@ -3,6 +3,7 @@ package srv
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
 	"github.com/ShatteredRealms/go-common-service/pkg/auth"
@@ -12,6 +13,7 @@ import (
 	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
 	"github.com/ShatteredRealms/go-common-service/pkg/util"
 	"github.com/WilSimpson/gocloak/v13"
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -73,13 +75,13 @@ func (c *connectionServiceServer) ConnectGameServer(
 	}
 
 	if c.Context.Config.Mode == config.ModeLocal {
-		pc, err := c.Context.ConnectionService.CreatePendingConnection(ctx, "localhost", request.Id)
+		pc, err := c.Context.ConnectionService.CreatePendingConnection(ctx, request.Id, "local")
 		if err != nil {
 			log.Logger.WithContext(ctx).Errorf("code %v: %v", ErrCreatePendingConnection, err)
 			return nil, status.Error(codes.Internal, ErrCreatePendingConnection.Error())
 		}
 		return &pb.ConnectGameServerResponse{
-			Address:      "localhost",
+			Address:      "127.0.0.1",
 			Port:         7777,
 			ConnectionId: pc.Id.String(),
 		}, nil
@@ -117,7 +119,22 @@ func (c *connectionServiceServer) VerifyConnect(
 	ctx context.Context,
 	request *pb.VerifyConnectRequest,
 ) (*commonpb.TargetId, error) {
-	panic("unimplemented")
+	err := c.Context.validateRole(ctx, RoleManageConnections)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := uuid.Parse(request.ConnectionId)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("invalid connection id: %v", err))
+	}
+
+	pc, err := c.Context.ConnectionService.CheckPlayerConnection(ctx, &id, request.ServerName)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return &commonpb.TargetId{Id: pc.CharacterId.String()}, nil
 }
 
 func NewConnectionServiceServer(ctx context.Context, srvCtx *GameServerContext) (pb.ConnectionServiceServer, error) {
