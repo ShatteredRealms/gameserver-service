@@ -44,7 +44,12 @@ func NewGameServerContext(ctx context.Context, cfg *config.GameServerConfig, ser
 		return nil, fmt.Errorf("connect db: %w", err)
 	}
 
-	migrater, err := commonrepo.NewPgxMigrater(ctx, cfg.Postgres.PostgresDSN(), "migrations")
+	migrater, err := commonrepo.NewPgxMigrater(
+		ctx,
+		cfg.Postgres.PostgresDSN(),
+		"migrations",
+		cfg.Mode != commoncfg.ModeProduction,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("new migrater: %w", err)
 	}
