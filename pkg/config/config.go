@@ -59,9 +59,9 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 				ClientId:     "sro-gameserver-service",
 				ClientSecret: "**********",
 			},
-			Mode:                config.ModeLocal,
-			LogLevel:            logrus.InfoLevel,
-			OpenTelemtryAddress: "localhost:4317",
+			Mode:                 config.ModeLocal,
+			LogLevel:             logrus.InfoLevel,
+			OpenTelemetryAddress: "localhost:4317",
 			Kafka: cconfig.ServerAddresses{
 				{
 					Host: "localhost",

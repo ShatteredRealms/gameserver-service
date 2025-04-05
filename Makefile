@@ -146,6 +146,7 @@ git-major:
 	git push
 	git push --tags
 git-minor:
+	echo $(MINOR_VERSION)
 	git tag v$(MAJOR_VERSION).$(shell echo $(MINOR_VERSION)+1 | bc).0 
 	git push
 	git push --tags
