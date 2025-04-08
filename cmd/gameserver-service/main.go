@@ -135,6 +135,19 @@ func main() {
 		return
 	}
 
+	// GameServerData Service
+	gameServerDataService, err := srv.NewGameServerDataServiceServer(ctx, srvCtx)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("creating gameserverdata service: %v", err)
+		return
+	}
+	pb.RegisterGameServerDataServiceServer(grpcServer, gameServerDataService)
+	err = pb.RegisterGameServerDataServiceHandlerFromEndpoint(ctx, gwmux, cfg.Server.Address(), opts)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("register gameserverdata service handler endpoint: %v", err)
+		return
+	}
+
 	// Setup Complete
 	log.Logger.WithContext(ctx).Info("Initializtion complete")
 	span.End()
