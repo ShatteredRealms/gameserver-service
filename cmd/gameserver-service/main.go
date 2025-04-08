@@ -141,6 +141,8 @@ func main() {
 	srv, srvErr := util.StartServer(ctx, grpcServer, gwmux, cfg.Server.Address())
 	defer srv.Shutdown(ctx)
 
+	log.Logger.WithContext(ctx).Infof("GameServerImage: %s", cfg.Gsm.GameServerImage)
+
 	select {
 	case err := <-srvErr:
 		if err != nil {

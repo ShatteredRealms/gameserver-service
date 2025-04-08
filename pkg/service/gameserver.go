@@ -44,6 +44,8 @@ type GameServerManagerService interface {
 
 	// Stop stops processing incoming dimension map changes.
 	Stop()
+
+	CountGameServers(ctx context.Context) (int, error)
 }
 
 type gsmService struct {
@@ -55,6 +57,28 @@ type gsmService struct {
 	mu                   sync.Mutex
 	ctx                  context.Context
 	cancelFunc           context.CancelFunc
+}
+
+func NewGameServerManagerService(
+	gameServerConfig *config.GameServerManagerConfig,
+) (GameServerManagerService, error) {
+	// If the kube config path is empty, then the in-cluster config will be used.
+	config, err := clientcmd.BuildConfigFromFlags("", gameServerConfig.KubeConfigPath)
+	if err != nil {
+		return nil, fmt.Errorf("get kubernetes config: %w", err)
+	}
+
+	g := &gsmService{
+		config:               gameServerConfig,
+		DimensionMapsChanged: make(chan dimensionMap, 30),
+	}
+
+	g.agones, err = versioned.NewForConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf("create agones client: %w", err)
+	}
+
+	return g, nil
 }
 
 // DeleteExtra implements GameServerManagerService.
@@ -297,24 +321,13 @@ func (g *gsmService) deleteGameServers(ctx context.Context, dimension *game.Dime
 	return nil
 }
 
-func NewGameServerManagerService(
-	gameServerConfig *config.GameServerManagerConfig,
-) (GameServerManagerService, error) {
-	// If the kube config path is empty, then the in-cluster config will be used.
-	config, err := clientcmd.BuildConfigFromFlags("", gameServerConfig.KubeConfigPath)
+// CountGameServers implements GameServerManagerService.
+func (g *gsmService) CountGameServers(ctx context.Context) (int, error) {
+	fleetList, err := g.agones.AgonesV1().Fleets(g.config.GameServerNamespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("get kubernetes config: %w", err)
+		log.Logger.WithContext(ctx).Errorf("list fleets: %v", err)
+		return 0, err
 	}
 
-	g := &gsmService{
-		config:               gameServerConfig,
-		DimensionMapsChanged: make(chan dimensionMap, 30),
-	}
-
-	g.agones, err = versioned.NewForConfig(config)
-	if err != nil {
-		return nil, fmt.Errorf("create agones client: %w", err)
-	}
-
-	return g, nil
+	return len(fleetList.Items), nil
 }
