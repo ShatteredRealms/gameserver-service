@@ -6,11 +6,9 @@ import (
 	"fmt"
 
 	"github.com/ShatteredRealms/gameserver-service/pkg/pb"
-	"github.com/ShatteredRealms/go-common-service/pkg/auth"
 	"github.com/ShatteredRealms/go-common-service/pkg/config"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	commonpb "github.com/ShatteredRealms/go-common-service/pkg/pb"
-	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
 	"github.com/ShatteredRealms/go-common-service/pkg/util"
 	"github.com/WilSimpson/gocloak/v13"
 	"github.com/google/uuid"
@@ -38,12 +36,17 @@ var (
 
 	RoleConnectionStatus = util.RegisterRole(&gocloak.Role{
 		Name:        gocloak.StringP("game.connections.status"),
-		Description: gocloak.StringP("Allows to view the status of any character"),
+		Description: gocloak.StringP("Allows to view the status of own character"),
+	}, &ConnectionRoles)
+	RoleConnectionStatusAll = util.RegisterRole(&gocloak.Role{
+		Name:        gocloak.StringP("game.connections.status.all"),
+		Description: gocloak.StringP("Allows to view the status of any and all characters"),
 	}, &ConnectionRoles)
 )
 
 var (
 	ErrCheckCharacterOwnership = errors.New("GS-CH-01")
+	ErrGetCharacters           = errors.New("GS-CH-02")
 	ErrCreatePendingConnection = errors.New("GS-CO-01")
 )
 
@@ -57,25 +60,22 @@ func (c *connectionServiceServer) ConnectGameServer(
 	ctx context.Context,
 	request *commonpb.TargetId,
 ) (*pb.ConnectGameServerResponse, error) {
-	claims, ok := auth.RetrieveClaims(ctx)
-	if !ok {
-		return nil, commonsrv.ErrPermissionDenied
-	}
-	if !claims.HasResourceRole(RolePlay, c.Context.Config.Keycloak.ClientId) {
-		return nil, commonsrv.ErrPermissionDenied
-	}
-
-	ok, err := c.Context.CharacterService.DoesOwnCharacter(ctx, request.Id, claims.Subject)
+	character, err := c.Context.IsOwnerWithRoleOrAllRole(ctx, request.Id, RolePlay, RolePlayOther)
 	if err != nil {
-		log.Logger.WithContext(ctx).Errorf("code %v: %v", ErrCheckCharacterOwnership, err)
-		return nil, status.Error(codes.Internal, ErrCheckCharacterOwnership.Error())
-	}
-	if !ok && !claims.HasResourceRole(RolePlayOther, c.Context.Config.Keycloak.ClientId) {
-		return nil, commonsrv.ErrPermissionDenied
+		return nil, err
 	}
 
-	if c.Context.Config.Mode == config.ModeLocal {
-		pc, err := c.Context.ConnectionService.CreatePendingConnection(ctx, request.Id, "local")
+	playing, err := c.isUserPlayer(ctx, character.OwnerId.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if playing {
+		return nil, status.Error(codes.FailedPrecondition, "account is already playing")
+	}
+
+	if c.Context.Config.Mode != config.ModeProduction {
+		pc, err := c.Context.ConnectionService.CreatePendingConnection(ctx, request.Id, "sro-local-default")
 		if err != nil {
 			log.Logger.WithContext(ctx).Errorf("code %v: %v", ErrCreatePendingConnection, err)
 			return nil, status.Error(codes.Internal, ErrCreatePendingConnection.Error())
@@ -95,7 +95,20 @@ func (c *connectionServiceServer) IsCharacterPlaying(
 	ctx context.Context,
 	request *commonpb.TargetId,
 ) (*pb.ConnectionStatus, error) {
-	panic("unimplemented")
+	_, err := c.Context.IsOwnerWithRoleOrAllRole(ctx, request.Id, RoleConnectionStatus, RoleConnectionStatusAll)
+	if err != nil {
+		return nil, err
+	}
+
+	playing, err := c.Context.GsmService.AnyCharactersConneted(ctx, []string{request.Id})
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("code %v: %v", ErrCheckCharacterOwnership, err)
+		return nil, status.Error(codes.Internal, ErrCheckCharacterOwnership.Error())
+	}
+
+	return &pb.ConnectionStatus{
+		Online: playing,
+	}, nil
 }
 
 // IsUserPlaying implements pb.ConnectionServiceServer.
@@ -103,7 +116,19 @@ func (c *connectionServiceServer) IsUserPlaying(
 	ctx context.Context,
 	request *commonpb.TargetId,
 ) (*pb.ConnectionStatus, error) {
-	panic("unimplemented")
+	err := c.Context.IsSelfWithRoleOrAllRole(ctx, request.Id, RoleConnectionStatus, RoleConnectionStatusAll)
+	if err != nil {
+		return nil, err
+	}
+
+	playing, err := c.isUserPlayer(ctx, request.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ConnectionStatus{
+		Online: playing,
+	}, nil
 }
 
 // TransferPlayer implements pb.ConnectionServiceServer.
@@ -139,4 +164,14 @@ func (c *connectionServiceServer) VerifyConnect(
 
 func NewConnectionServiceServer(ctx context.Context, srvCtx *GameServerContext) (pb.ConnectionServiceServer, error) {
 	return &connectionServiceServer{Context: srvCtx}, srvCtx.CreateRoles(ctx, &ConnectionRoles)
+}
+
+func (c *connectionServiceServer) isUserPlayer(ctx context.Context, userId string) (bool, error) {
+	playing, err := c.Context.GsmService.AnyUsersConneted(ctx, []string{userId})
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("code %v: %v", ErrCheckCharacterOwnership, err)
+		return false, status.Error(codes.Internal, ErrCheckCharacterOwnership.Error())
+	}
+
+	return playing, nil
 }

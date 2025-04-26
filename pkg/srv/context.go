@@ -7,13 +7,18 @@ import (
 	"github.com/ShatteredRealms/gameserver-service/pkg/config"
 	"github.com/ShatteredRealms/gameserver-service/pkg/repository"
 	"github.com/ShatteredRealms/gameserver-service/pkg/service"
+	"github.com/ShatteredRealms/go-common-service/pkg/auth"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/character/characterbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/dimensionbus"
 	"github.com/ShatteredRealms/go-common-service/pkg/bus/gameserver/mapbus"
 	commoncfg "github.com/ShatteredRealms/go-common-service/pkg/config"
+	"github.com/ShatteredRealms/go-common-service/pkg/log"
 	commonrepo "github.com/ShatteredRealms/go-common-service/pkg/repository"
 	commonsrv "github.com/ShatteredRealms/go-common-service/pkg/srv"
+	"github.com/WilSimpson/gocloak/v13"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type GameServerContext struct {
@@ -146,4 +151,43 @@ func (c *GameServerContext) ResetMapBus() commonsrv.WriterResetCallback {
 
 		return c.MapBusWriter.PublishMany(ctx, msgs)
 	}
+}
+func (c *GameServerContext) IsSelfWithRoleOrAllRole(ctx context.Context, userId string, ownerRole, allRoll *gocloak.Role) error {
+	claims, ok := auth.RetrieveClaims(ctx)
+	if !ok {
+		return commonsrv.ErrPermissionDenied
+	}
+
+	if claims.Subject == userId {
+		if !claims.HasResourceRole(ownerRole, c.Config.Keycloak.ClientId) {
+			return commonsrv.ErrPermissionDenied
+		}
+	} else {
+		if !claims.HasResourceRole(allRoll, c.Config.Keycloak.ClientId) {
+			return commonsrv.ErrPermissionDenied
+		}
+	}
+
+	return nil
+}
+
+func (c *GameServerContext) IsOwnerWithRoleOrAllRole(ctx context.Context, characterId string, ownerRole, allRoll *gocloak.Role) (*characterbus.Character, error) {
+	claims, ok := auth.RetrieveClaims(ctx)
+	if !ok {
+		return nil, commonsrv.ErrPermissionDenied
+	}
+	if !claims.HasResourceRole(ownerRole, c.Config.Keycloak.ClientId) {
+		return nil, commonsrv.ErrPermissionDenied
+	}
+
+	character, err := c.CharacterService.GetCharacterById(ctx, characterId)
+	if err != nil {
+		log.Logger.WithContext(ctx).Errorf("code %v: %v", ErrCheckCharacterOwnership, err)
+		return nil, status.Error(codes.Internal, ErrCheckCharacterOwnership.Error())
+	}
+	if character.Id.String() != claims.Subject && !claims.HasResourceRole(allRoll, c.Config.Keycloak.ClientId) {
+		return nil, commonsrv.ErrPermissionDenied
+	}
+
+	return character, nil
 }

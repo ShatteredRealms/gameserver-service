@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 
 	v1 "agones.dev/agones/pkg/apis/agones/v1"
@@ -12,6 +13,7 @@ import (
 	"github.com/ShatteredRealms/gameserver-service/pkg/config"
 	"github.com/ShatteredRealms/gameserver-service/pkg/model/game"
 	"github.com/ShatteredRealms/go-common-service/pkg/log"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,6 +21,11 @@ import (
 
 var (
 	ErrNoServersAvailable = errors.New("no servers available")
+)
+
+const (
+	PLAYER_LIST_NAME     = "players"
+	CHARACTERS_LIST_NAME = "characters"
 )
 
 type dimensionMap struct {
@@ -45,13 +52,17 @@ type GameServerManagerService interface {
 	// Stop stops processing incoming dimension map changes.
 	Stop()
 
+	AnyCharactersConneted(ctx context.Context, characterIds []string) (bool, error)
+	AnyUsersConneted(ctx context.Context, userIds []string) (bool, error)
+
 	CountGameServers(ctx context.Context) (int, error)
 }
 
 type gsmService struct {
 	config *config.GameServerManagerConfig
 
-	agones versioned.Interface
+	agones    versioned.Interface
+	clientset *kubernetes.Clientset
 
 	DimensionMapsChanged chan dimensionMap
 	mu                   sync.Mutex
@@ -63,14 +74,21 @@ func NewGameServerManagerService(
 	gameServerConfig *config.GameServerManagerConfig,
 ) (GameServerManagerService, error) {
 	// If the kube config path is empty, then the in-cluster config will be used.
-	config, err := clientcmd.BuildConfigFromFlags("", gameServerConfig.KubeConfigPath)
+	path := os.ExpandEnv(gameServerConfig.KubeConfigPath)
+	config, err := clientcmd.BuildConfigFromFlags("", path)
 	if err != nil {
 		return nil, fmt.Errorf("get kubernetes config: %w", err)
+	}
+	// Create the kubernetes clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf("create kubernetes clientset: %w", err)
 	}
 
 	g := &gsmService{
 		config:               gameServerConfig,
 		DimensionMapsChanged: make(chan dimensionMap, 30),
+		clientset:            clientset,
 	}
 
 	g.agones, err = versioned.NewForConfig(config)
@@ -79,6 +97,51 @@ func NewGameServerManagerService(
 	}
 
 	return g, nil
+}
+
+func (g *gsmService) anyConnected(ctx context.Context, ids []string, key string) (bool, error) {
+
+	selectors := make([]aav1.GameServerSelector, len(ids))
+	for idx, id := range ids {
+		selectors[idx] = aav1.GameServerSelector{
+			Lists: map[string]aav1.ListSelector{
+				key: {
+					ContainsValue: id,
+				},
+			},
+		}
+	}
+
+	servers, err := g.agones.AgonesV1().GameServers(g.config.GameServerNamespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return false, fmt.Errorf("list gameservers: %w", err)
+	}
+
+	mapIds := make(map[string]struct{})
+	for _, id := range ids {
+		mapIds[id] = struct{}{}
+	}
+	for _, server := range servers.Items {
+		list, ok := server.Status.Lists[key]
+		if !ok {
+			return false, fmt.Errorf("gameserver %s does not have %s list", server.Name, key)
+		}
+		for _, player := range list.Values {
+			if _, ok := mapIds[player]; ok {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
+func (g *gsmService) AnyUsersConneted(ctx context.Context, characterIds []string) (bool, error) {
+	return g.anyConnected(ctx, characterIds, PLAYER_LIST_NAME)
+}
+
+func (g *gsmService) AnyCharactersConneted(ctx context.Context, characterIds []string) (bool, error) {
+	return g.anyConnected(ctx, characterIds, CHARACTERS_LIST_NAME)
 }
 
 // DeleteExtra implements GameServerManagerService.

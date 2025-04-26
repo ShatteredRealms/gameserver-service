@@ -36,8 +36,16 @@ func (p *pgxConnectionRepository) CreatePendingConnection(
 		return nil, err
 	}
 
-	rows, err := tx.Query(ctx,
-		"INSERT INTO pending_connections (character_id, server_name) VALUES ($1, $2) RETURNING *",
+	rows, err := tx.Query(ctx, `
+		INSERT INTO pending_connections(character_id, server_name, owner_id)
+		VALUES (
+			$1::UUID,
+			$2,
+			(
+				SELECT owner_id FROM characters WHERE id = $1::UUID
+			)
+		)
+		RETURNING *`,
 		characterId, serverName)
 	if err != nil {
 		return nil, err

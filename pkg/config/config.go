@@ -91,6 +91,7 @@ func NewGameServerConfig(ctx context.Context) (*GameServerConfig, error) {
 			FleetPrefix:           "sro-f",
 			FleetAutoscalerPrefix: "sro-fas",
 			GameServerNamespace:   "sro-gs",
+			KubeConfigPath:        "$HOME/.kube/config",
 		},
 	}
 

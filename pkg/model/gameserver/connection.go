@@ -13,6 +13,9 @@ type PendingConnection struct {
 	// Character id of the character attempting to connect
 	CharacterId uuid.UUID `db:"character_id" json:"characterId"`
 
+	// Owner id for the character
+	OwnerId uuid.UUID `db:"owner_id" json:"ownerId"`
+
 	// ServerName the name of the server the character is assigned to
 	ServerName string `db:"server_name" json:"serverName"`
 
